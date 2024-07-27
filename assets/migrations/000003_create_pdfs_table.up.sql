@@ -1,0 +1,9 @@
+CREATE TABLE images(
+    id TEXT NOT NULL PRIMARY KEY,
+    filename TEXT NOT NULL,
+    description TEXT,
+    user_id INT NOT NULL,
+    created DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
