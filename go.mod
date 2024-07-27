@@ -3,6 +3,7 @@ module github.com/maheshrc27/storemypdf
 go 1.21.0
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-chi/chi/v5 v5.1.0
 	github.com/go-playground/form/v4 v4.2.1
 	github.com/golang-migrate/migrate/v4 v4.17.1
@@ -11,6 +12,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/tomasen/realip v0.0.0-20180522021738-f0c99a92ddce
 	github.com/wneessen/go-mail v0.4.2
+	golang.org/x/crypto v0.20.0
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
 	golang.org/x/text v0.16.0
 )

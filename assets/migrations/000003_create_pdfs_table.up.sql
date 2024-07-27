@@ -1,4 +1,4 @@
-CREATE TABLE images(
+CREATE TABLE pdfs(
     id TEXT NOT NULL PRIMARY KEY,
     filename TEXT NOT NULL,
     description TEXT,

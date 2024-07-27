@@ -1,0 +1,10 @@
+{{define "page:title"}}Sign In To Your Account{{end}}
+
+{{define "page:main"}}
+<form action="/signup" method="POST">
+    <input type="email" name="email" placeholder="email" required />
+    <input type="password" name="password" placeholder="password" required />
+    <input type="password" name="confirm_password" placeholder="confirm password" required />
+    <button type="submit">Signup</button>
+</form>
+{{end}}

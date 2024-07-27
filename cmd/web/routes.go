@@ -9,17 +9,23 @@ import (
 )
 
 func (app *application) routes() http.Handler {
-	mux := chi.NewRouter()
-	mux.NotFound(app.notFound)
+	r := chi.NewRouter()
+	r.NotFound(app.notFound)
 
-	mux.Use(app.logAccess)
-	mux.Use(app.recoverPanic)
-	mux.Use(app.securityHeaders)
+	r.Use(app.logAccess)
+	r.Use(app.recoverPanic)
+	r.Use(app.securityHeaders)
 
 	fileServer := http.FileServer(http.FS(assets.EmbeddedFiles))
-	mux.Handle("/static/*", fileServer)
+	r.Handle("/static/*", fileServer)
 
-	mux.Get("/", app.home)
+	r.Get("/", app.home)
 
-	return mux
+	r.Get("/signup", app.SignUp)
+	r.Post("/signup", app.SignUp)
+
+	r.Get("/signin", app.SignIn)
+	r.Post("/signin", app.SignIn)
+
+	return r
 }
