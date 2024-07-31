@@ -1,8 +1,10 @@
-CREATE TABLE pdfs(
+CREATE TABLE files(
     id TEXT NOT NULL PRIMARY KEY,
     filename TEXT NOT NULL,
     description TEXT,
-    user_id INT NOT NULL,
+    file_type TEXT NOT NULL,
+    size BIGINT NOT NULL,
+    user_id INT,
     created DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE

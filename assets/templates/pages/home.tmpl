@@ -1,5 +1,15 @@
 {{define "page:title"}}Example page{{end}}
 
 {{define "page:main"}}
-<p>This is an example page.</p>
+<form method="POST" action="/upload" enctype="multipart/form-data">
+<input type="file" name="file"/>
+<select name="delete_after">
+  <option value="1">1 Hour</option>
+  <option value="2">2 Hour</option>
+  <option value="3">3 Hour</option>
+  <option value="4">4 Hour</option>
+</select>
+<textarea type="text" name="description"></textarea>
+<button type="submit">Upload</button>
+</form>
 {{end}}

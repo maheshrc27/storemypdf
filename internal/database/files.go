@@ -7,24 +7,26 @@ import (
 	"time"
 )
 
-type Pdf struct {
+type File struct {
 	ID          string    `db:"id"`
 	FileName    string    `db:"filename"`
 	Description string    `db:"description"`
+	FileType    string    `db:"file_type"`
+	Size        int64     `db:"size"`
 	UserID      int       `db:"user_id"`
 	Created     time.Time `db:"created"`
 	Updated     time.Time `db:"updated"`
 }
 
-func (db *DB) InsertPdf(id, filename, description string, width, height, userId int) error {
+func (db *DB) InsertFile(id, filename, description, fileType string, size int64, userId int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
 	query := `
-		INSERT INTO pdfs (id, filename, description, user_id, updated)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)`
+		INSERT INTO files (id, filename, description, file_type, size, user_id)
+		VALUES ($1, $2, $3, $4, $5, $6)`
 
-	_, err := db.ExecContext(ctx, query, id, filename, description, width, height, userId, time.Now())
+	_, err := db.ExecContext(ctx, query, id, filename, description, fileType, size, userId)
 	if err != nil {
 		return err
 	}
@@ -32,13 +34,13 @@ func (db *DB) InsertPdf(id, filename, description string, width, height, userId 
 	return nil
 }
 
-func (db *DB) GetPdf(id string) (*Pdf, bool, error) {
+func (db *DB) GetFile(id string) (*File, bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
-	var image Pdf
+	var image File
 
-	query := `SELECT * FROM pdfs WHERE id = $1`
+	query := `SELECT * FROM files WHERE id = $1`
 
 	err := db.GetContext(ctx, &image, query, id)
 	if err != nil {
@@ -51,13 +53,13 @@ func (db *DB) GetPdf(id string) (*Pdf, bool, error) {
 	return &image, true, err
 }
 
-func (db *DB) GetPdfsByUserID(userId string) ([]Pdf, bool, error) {
+func (db *DB) GetFileByUserID(userId string) ([]File, bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
-	var images []Pdf
+	var images []File
 
-	query := `SELECT * FROM pdfs WHERE user_id = $1`
+	query := `SELECT * FROM files WHERE user_id = $1`
 
 	rows, err := db.QueryContext(ctx, query, userId)
 	if err != nil {
@@ -66,7 +68,7 @@ func (db *DB) GetPdfsByUserID(userId string) ([]Pdf, bool, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var img Pdf
+		var img File
 		if err := rows.Scan(&img.ID, &img.FileName, &img.Description,
 			&img.UserID, &img.Created, &img.Updated); err != nil {
 			return images, false, err
@@ -85,11 +87,11 @@ func (db *DB) GetPdfsByUserID(userId string) ([]Pdf, bool, error) {
 	return images, true, nil
 }
 
-func (db *DB) DeletePdf(id string) error {
+func (db *DB) DeleteFile(id string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
-	query := `DELETE FROM pdfs WHERE id = $1`
+	query := `DELETE FROM files WHERE id = $1`
 
 	_, err := db.ExecContext(ctx, query, id)
 	return err

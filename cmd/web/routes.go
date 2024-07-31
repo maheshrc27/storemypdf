@@ -27,5 +27,7 @@ func (app *application) routes() http.Handler {
 	r.Get("/signin", app.SignIn)
 	r.Post("/signin", app.SignIn)
 
+	r.Post("/upload", app.UploadFile)
+
 	return r
 }
