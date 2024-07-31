@@ -89,3 +89,16 @@ migrations/force:
 migrations/version:
 	go run -tags 'sqlite3' github.com/golang-migrate/migrate/v4/cmd/migrate@latest -path=./assets/migrations -database="sqlite3://db.sqlite" version
 
+# ==================================================================================== #
+# TAILWINDCSS
+# ==================================================================================== #
+
+## tailwind/watch: Start a Watcher
+.PHONY: tailwind/watch
+tailwind/watch:
+	./tailwindcss -i ./assets/static/css/main.css -o ./assets/static/css/tailwind.css --watch
+
+## tailwind/watch: Compile and Minify CSS for Production
+.PHONY: tailwind/minify
+tailwind/minify:
+	./tailwindcss -i ./assets/static/css/main.css -o ./assets/static/css/tailwind.css --minify
