@@ -20,6 +20,7 @@ func (app *application) routes() http.Handler {
 	r.Handle("/static/*", fileServer)
 
 	r.Get("/", app.home)
+	r.Get("/api/docs", app.ApiDocs)
 
 	r.Get("/signup", app.SignUp)
 	r.Post("/signup", app.SignUp)

@@ -1,0 +1,63 @@
+{{define "partial:navbar"}}
+<header class="w-full border-b">
+    <div class="max-w-screen-xl mx-auto h-16 flex items-center justify-between px-4">
+      <!-- Logo -->
+      <a href="/" class="text-xl font-bold">storemypdf</a>
+      
+      <!-- Mobile Menu Button -->
+      <button id="mobile-menu-button" class="block lg:hidden px-3 py-2 text-gray-500 hover:text-gray-900">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 6h16M4 12h16m-7 6h7" />
+        </svg>
+      </button>
+      
+      <!-- Desktop Navigation -->
+      <nav id="desktop-nav" class="hidden lg:flex items-center space-x-5">
+        <a href="/#pricing" class="font-medium text-md text-gray-500 hover:text-gray-900">Pricing</a>
+        <a href="/api/docs" class="font-medium text-md text-gray-500 hover:text-gray-900">API docs</a>
+        <a href="#" class="font-medium text-md text-gray-500 hover:text-gray-900">Blog</a>
+      </nav>
+      
+      <!-- Sign In Button -->
+      <a href="/signin" class="font-semibold px-3 py-2 rounded text-white bg-sky-600 hover:bg-sky-500 hidden lg:block">Sign In</a>
+      
+      <!-- Mobile Navigation -->
+      <nav id="mobile-nav" class="fixed inset-0 bg-white shadow-lg transform -translate-x-full transition-transform lg:hidden" aria-label="Mobile Navigation">
+        <button id="mobile-close-button" class="absolute top-4 right-4 px-3 py-2 text-gray-500 hover:text-gray-900">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <div class="flex flex-col items-center mt-16 space-y-4">
+          <a href="/#pricing" class="font-medium text-md text-gray-500 hover:text-gray-900">Pricing</a>
+          <a href="/docs" class="font-medium text-md text-gray-500 hover:text-gray-900">API docs</a>
+          <a href="#" class="font-medium text-md text-gray-500 hover:text-gray-900">Blog</a>
+          <a href="/signin" class="font-semibold px-3 py-2 rounded text-white bg-sky-600 hover:bg-sky-500">Sign In</a>
+        </div>
+      </nav>
+    </div>
+</header>
+<script>
+    // Get elements
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileNav = document.getElementById('mobile-nav');
+    const mobileCloseButton = document.getElementById('mobile-close-button');
+  
+    // Toggle mobile menu visibility
+    mobileMenuButton.addEventListener('click', () => {
+      mobileNav.style.transform = 'translateX(0)';
+    });
+  
+    // Close mobile menu
+    mobileCloseButton.addEventListener('click', () => {
+      mobileNav.style.transform = 'translateX(-100%)';
+    });
+  
+    // Optionally close mobile menu when clicking outside of it
+    document.addEventListener('click', (event) => {
+      if (!mobileNav.contains(event.target) && !mobileMenuButton.contains(event.target)) {
+        mobileNav.style.transform = 'translateX(-100%)';
+      }
+    });
+</script>
+{{end}}

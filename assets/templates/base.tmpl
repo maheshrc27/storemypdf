@@ -3,17 +3,14 @@
 <html lang='en'>
     <head>
         <meta charset='utf-8'>
-        <title>{{template "page:title" .}}</title>
+        <title>storemypdf - {{template "page:title" .}}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         {{block "page:meta" .}}{{end}}
         
         <link rel='stylesheet' href='/static/css/tailwind.css?version={{.Version}}'>
     </head>
     <body>
-        <header class="max-w-screen-lg mx-auto bg-sky-300">
-            <h1><a href="/">Example header</a></h1>
-            {{template "partial:nav" .}}
-        </header>
+        {{template "partial:navbar" .}}
         <main>
             {{template "page:main" .}}
         </main>
