@@ -1,5 +1,5 @@
 
-# storemypdf API Documentation
+# API Documentation
 
 ## Overview
 
@@ -7,6 +7,15 @@ The `storemypdf` API provides endpoints for uploading, retrieving, and downloadi
 
 **Base URL:**  
 `https://storemypdf/api`
+
+## Authentication
+
+API requests must include an API key for authentication. You can provide the API key as a query parameter.
+
+- **Query Parameter Authentication:** 
+  - Append `?key=YOUR_API_KEY` to the endpoint URL.
+
+Replace `YOUR_API_KEY` with your actual API key.
 
 ## Endpoints
 
@@ -96,10 +105,6 @@ The `storemypdf` API provides endpoints for uploading, retrieving, and downloadi
 - **400 Bad Request:** The request was invalid. This could be due to missing parameters or invalid values.
 - **404 Not Found:** The requested resource could not be found. This may occur if the file ID does not exist.
 - **500 Internal Server Error:** An unexpected error occurred on the server.
-
-## Authentication
-
-The API does not require authentication for file upload and retrieval. Consider implementing authentication for secure operations in a production environment.
 
 ## Rate Limiting
 

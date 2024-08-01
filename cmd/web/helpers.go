@@ -7,9 +7,14 @@ import (
 	"github.com/maheshrc27/storemypdf/internal/version"
 )
 
-func (app *application) newTemplateData(r *http.Request) map[string]any {
+func (app *application) newTemplateData(templateData interface{}) map[string]any {
 	data := map[string]any{
 		"Version": version.Get(),
+	}
+	if templateDataMap, ok := templateData.(map[string]any); ok {
+		for key, value := range templateDataMap {
+			data[key] = value
+		}
 	}
 
 	return data
