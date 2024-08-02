@@ -21,12 +21,11 @@ func (app *application) routes() http.Handler {
 
 	r.Get("/", app.home)
 	r.Get("/api/docs", app.ApiDocs)
-
 	r.Get("/f/{id}", app.FileInfo)
+	r.Get("/f/{id}/open", app.ReadFile)
 
 	r.Get("/signup", app.SignUp)
 	r.Post("/signup", app.SignUp)
-
 	r.Get("/signin", app.SignIn)
 	r.Post("/signin", app.SignIn)
 
