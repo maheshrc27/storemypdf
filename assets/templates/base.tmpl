@@ -6,8 +6,8 @@
         <title>storemypdf - {{template "page:title" .}}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         {{block "page:meta" .}}{{end}}
-        
         <link rel='stylesheet' href='/static/css/tailwind.css?version={{.Version}}'>
+        <script src="https://unpkg.com/htmx.org@2.0.1"></script>
     </head>
     <body>
         {{template "partial:navbar" .}}

@@ -153,3 +153,17 @@ func (app *application) SignIn(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 	}
 }
+
+func (app *application) Logout(w http.ResponseWriter, r *http.Request) {
+	cookie := http.Cookie{
+		Name:     "authentication",
+		Value:    "",
+		Path:     "/",
+		Expires:  time.Now(),
+		HttpOnly: true,
+		Secure:   true,
+	}
+	cookies.Write(w, cookie)
+
+	http.Redirect(w, r, "/", http.StatusFound)
+}

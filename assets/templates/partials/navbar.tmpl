@@ -19,7 +19,12 @@
       </nav>
       
       <!-- Sign In Button -->
-      <a href="/signin" class="font-semibold px-3 py-2 rounded text-white bg-sky-600 hover:bg-sky-500 hidden lg:block">Sign In</a>
+      {{ if .loggedIn}}
+      <a href="/signout" class="font-semibold px-3 py-2 rounded text-white bg-sky-600 hover:bg-sky-500 hidden lg:block">Sign Out</a>
+      {{ else }}
+      <button hx-post="/logout" class="font-semibold px-3 py-2 rounded text-white bg-sky-600 hover:bg-sky-500 hidden lg:block">Sign In</button>
+      {{ end }}
+
       
       <!-- Mobile Navigation -->
       <nav id="mobile-nav" class="fixed inset-0 bg-white shadow-lg transform -translate-x-full transition-transform lg:hidden" aria-label="Mobile Navigation">
