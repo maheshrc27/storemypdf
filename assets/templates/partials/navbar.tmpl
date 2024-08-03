@@ -20,9 +20,9 @@
       
       <!-- Sign In Button -->
       {{ if .loggedIn}}
-      <a href="/signout" class="font-semibold px-3 py-2 rounded text-white bg-sky-600 hover:bg-sky-500 hidden lg:block">Sign Out</a>
+      <button hx-post="/signout" class="font-semibold px-3 py-2 rounded text-white bg-sky-600 hover:bg-sky-500 hidden lg:block">Sign Out</button>
       {{ else }}
-      <button hx-post="/logout" class="font-semibold px-3 py-2 rounded text-white bg-sky-600 hover:bg-sky-500 hidden lg:block">Sign In</button>
+      <a href="/signin" class="font-semibold px-3 py-2 rounded text-white bg-sky-600 hover:bg-sky-500 hidden lg:block">Sign In</a>
       {{ end }}
 
       

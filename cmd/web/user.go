@@ -145,7 +145,7 @@ func (app *application) SignIn(w http.ResponseWriter, r *http.Request) {
 			Path:     "/",
 			MaxAge:   int(time.Until(expirationTime).Seconds()),
 			HttpOnly: true,
-			Secure:   true,
+			Secure:   false,
 		}
 
 		cookies.Write(w, cookie)
@@ -165,5 +165,5 @@ func (app *application) Logout(w http.ResponseWriter, r *http.Request) {
 	}
 	cookies.Write(w, cookie)
 
-	http.Redirect(w, r, "/", http.StatusFound)
+	http.Redirect(w, r, "/", http.StatusAccepted)
 }

@@ -12,7 +12,19 @@ import (
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	data := app.newTemplateData(r)
+
+	isLoggedIn := r.Header.Get("X-Logged-IN")
+	userId := r.Header.Get("X-User-ID")
+	fmt.Println(isLoggedIn)
+	fmt.Println(userId)
+
+	fileData := make(map[string]any)
+	fileData["loggedIn"] = false
+	if isLoggedIn == "true" {
+		fileData["loggedIn"] = true
+	}
+
+	data := app.newTemplateData(fileData)
 
 	err := response.Page(w, http.StatusOK, data, "pages/home.tmpl")
 	if err != nil {
@@ -30,10 +42,12 @@ func (app *application) ApiDocs(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) FileInfo(w http.ResponseWriter, r *http.Request) {
+	isLoggedIn := r.Header.Get("X-Logged-IN")
+	userId := r.Header.Get("X-User-ID")
+	fmt.Println(isLoggedIn)
+	fmt.Println(userId)
 	id := chi.URLParam(r, "id")
-	fmt.Println("File ID:", id)
 
-	// Fetch file info from the database
 	fileInfo, found, err := app.db.GetFile(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -45,6 +59,11 @@ func (app *application) FileInfo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fileData := make(map[string]any)
+	if isLoggedIn == "true" {
+		fileData["loggedIn"] = true
+	} else {
+		fileData["loggedIn"] = false
+	}
 	fileData["file_id"] = id
 	fileData["filename"] = fileInfo.FileName
 	fileData["description"] = fileInfo.Description

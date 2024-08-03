@@ -5,6 +5,8 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/dgrijalva/jwt-go"
+	"github.com/maheshrc27/storemypdf/internal/cookies"
 	"github.com/maheshrc27/storemypdf/internal/response"
 
 	"github.com/tomasen/realip"
@@ -52,4 +54,59 @@ func (app *application) logAccess(next http.Handler) http.Handler {
 
 		app.logger.Info("access", userAttrs, requestAttrs, responseAttrs)
 	})
+}
+
+func (app *application) AuthMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cookie, err := cookies.Read(r, "authentication")
+		if err == nil && cookie != "" {
+			token := cookie
+			authorized, err := IsAuthorized(token, app.config.cookie.secretKey)
+			if err == nil && authorized {
+				userID, err := ExtractIDFromToken(token, app.config.cookie.secretKey)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusBadRequest)
+					return
+				}
+				r.Header.Set("X-Logged-IN", "true")
+				r.Header.Set("X-User-ID", userID)
+			}
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func IsAuthorized(requestToken, secret string) (bool, error) {
+	_, err := jwt.Parse(requestToken, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secret), nil
+	})
+
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func ExtractIDFromToken(requestToken string, secret string) (string, error) {
+	token, err := jwt.Parse(requestToken, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secret), nil
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+
+	if !ok || !token.Valid {
+		return "", fmt.Errorf("invalid token")
+	}
+
+	id, ok := claims["id"].(string)
+	if !ok {
+		return "", fmt.Errorf("id claim not found")
+	}
+
+	return id, nil
 }

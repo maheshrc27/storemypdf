@@ -15,6 +15,7 @@ func (app *application) routes() http.Handler {
 	r.Use(app.logAccess)
 	r.Use(app.recoverPanic)
 	r.Use(app.securityHeaders)
+	r.Use(app.AuthMiddleware)
 
 	fileServer := http.FileServer(http.FS(assets.EmbeddedFiles))
 	r.Handle("/static/*", fileServer)
@@ -28,6 +29,7 @@ func (app *application) routes() http.Handler {
 	r.Post("/signup", app.SignUp)
 	r.Get("/signin", app.SignIn)
 	r.Post("/signin", app.SignIn)
+	r.Post("/signout", app.Logout)
 
 	r.Post("/upload", app.UploadFile)
 
