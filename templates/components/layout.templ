@@ -1,6 +1,16 @@
 package components
 
 templ Layout(title string, isLoggedIn bool) {
+    @HtmlWrapper(title) {
+        @header(isLoggedIn)
+            <main>
+                { children... }
+            </main>
+        @footer()
+    }
+}
+
+templ HtmlWrapper(title string) {
     <html lang='en'>
         <head>
             <meta charset='utf-8'>
@@ -10,11 +20,7 @@ templ Layout(title string, isLoggedIn bool) {
             <script src="https://unpkg.com/htmx.org@2.0.1"></script>
         </head>
         <body>
-            @header(isLoggedIn)
-            <main>
-                { children... }
-            </main>
-            @footer()
+            { children... }
         </body>
     </html>
 }

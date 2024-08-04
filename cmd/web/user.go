@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,7 +11,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/maheshrc27/storemypdf/internal/cookies"
 	"github.com/maheshrc27/storemypdf/internal/request"
-	"github.com/maheshrc27/storemypdf/internal/response"
+	"github.com/maheshrc27/storemypdf/templates/pages"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -24,12 +25,8 @@ func (app *application) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		data := app.newTemplateData(r)
-
-		err := response.Page(w, http.StatusOK, data, "pages/signup.tmpl")
-		if err != nil {
-			app.serverError(w, r, err)
-		}
+		signup := pages.SignUp("Create a Account")
+		signup.Render(context.Background(), w)
 
 	case http.MethodPost:
 		var form createAccountForm
@@ -101,11 +98,8 @@ func (app *application) SignIn(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		data := app.newTemplateData(r)
-		err := response.Page(w, http.StatusOK, data, "pages/signin.tmpl")
-		if err != nil {
-			app.serverError(w, r, err)
-		}
+		signin := pages.SignIn("Sign In to your Account")
+		signin.Render(context.Background(), w)
 
 	case http.MethodPost:
 		var form Credentials
