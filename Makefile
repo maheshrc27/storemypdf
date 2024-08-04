@@ -51,8 +51,9 @@ build:
 	
 ## run: run the cmd/web application
 .PHONY: run
-run: build
-	/tmp/bin/web
+run:
+	@go run github.com/a-h/templ/cmd/templ@latest generate 
+	@go run ./cmd/web
 
 
 # ==================================================================================== #

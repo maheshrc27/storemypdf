@@ -78,6 +78,17 @@ func (app *application) SignUp(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) SignIn(w http.ResponseWriter, r *http.Request) {
+	isLoggedIn := r.Header.Get("X-Logged-IN")
+	if isLoggedIn != "" {
+		loggedIn, err := strconv.ParseBool(isLoggedIn)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+		if loggedIn {
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+		}
+	}
+
 	type Credentials struct {
 		Email    string `form:"email"`
 		Password string `form:"password"`

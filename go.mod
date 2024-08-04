@@ -3,6 +3,7 @@ module github.com/maheshrc27/storemypdf
 go 1.21.0
 
 require (
+	github.com/a-h/templ v0.2.747
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gabriel-vasile/mimetype v1.4.5
 	github.com/go-chi/chi/v5 v5.1.0

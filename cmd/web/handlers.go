@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/maheshrc27/storemypdf/internal/response"
+	"github.com/maheshrc27/storemypdf/templates/pages"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -18,18 +20,8 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(isLoggedIn)
 	fmt.Println(userId)
 
-	fileData := make(map[string]any)
-	fileData["loggedIn"] = false
-	if isLoggedIn == "true" {
-		fileData["loggedIn"] = true
-	}
-
-	data := app.newTemplateData(fileData)
-
-	err := response.Page(w, http.StatusOK, data, "pages/home.tmpl")
-	if err != nil {
-		app.serverError(w, r, err)
-	}
+	home := pages.Home("store files", false)
+	home.Render(context.Background(), w)
 }
 
 func (app *application) ApiDocs(w http.ResponseWriter, r *http.Request) {

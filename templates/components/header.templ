@@ -1,5 +1,7 @@
-{{define "partial:navbar"}}
-<header class="w-full border-b">
+package components
+
+templ header(isLoggedIn bool) {
+    <header class="w-full border-b">
     <div class="max-w-screen-xl mx-auto h-16 flex items-center justify-between px-4">
       <!-- Logo -->
       <a href="/" class="text-xl font-bold">storemypdf</a>
@@ -19,11 +21,11 @@
       </nav>
       
       <!-- Sign In Button -->
-      {{ if .loggedIn}}
-      <button hx-post="/signout" onsubmit="reloadPage()" class="font-semibold px-3 py-2 rounded text-white bg-sky-600 hover:bg-sky-500 hidden lg:block">Sign Out</button>
-      {{ else }}
+      if isLoggedIn {
+        <button hx-post="/signout" onsubmit="reloadPage()" class="font-semibold px-3 py-2 rounded text-white bg-sky-600 hover:bg-sky-500 hidden lg:block">Sign Out</button>
+      } else {
       <a href="/signin" class="font-semibold px-3 py-2 rounded text-white bg-sky-600 hover:bg-sky-500 hidden lg:block">Sign In</a>
-      {{ end }}
+      }
 
       
       <!-- Mobile Navigation -->
@@ -65,4 +67,4 @@
       }
     });
 </script>
-{{end}}
+}

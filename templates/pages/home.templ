@@ -1,0 +1,146 @@
+package pages
+
+import "github.com/maheshrc27/storemypdf/templates/components"
+
+templ Home(title string, isLoggedIn bool) {
+    @components.Layout(title, isLoggedIn) {
+        <!-- Hero Section -->
+        <section class="py-12 px-6 bg-gradient-to-r from-blue-50 to-blue-100">
+        <div class="max-w-screen-lg mx-auto text-center">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800">Effortlessly Upload and Share Your Files</h1>
+            <p class="mt-4 text-lg text-gray-600">Upload, organize, and access PDFs and more – all in one seamless platform.</p>
+            <div class="mt-8">
+            <button id="start-uploading-button" class="w-48 mx-auto px-6 py-3 bg-sky-600 hover:bg-sky-500 text-lg font-semibold text-white rounded shadow-lg transition duration-300">Start Uploading</button>
+            </div>
+        </div>
+        </section>
+
+        <!-- Hidden Upload Form -->
+        <div id="upload-form-container" class="hidden border-b py-8 px-5">
+        <form method="POST" action="/upload" enctype="multipart/form-data">
+            <div class="max-w-screen-sm mx-auto flex flex-col gap-8">
+            <input type="file" name="file" class="file:mr-5 file:py-2 file:px-3 file:rounded file:font-medium hover:file:cursor-pointer"/>
+            <div>
+                <label for="delete_after" class="font-medium">Auto Delete In: </label>
+                <select name="delete_after" class="px-3 py-2 rounded">
+                <option value="0">Do not delete</option>
+                <option value="1">1 Hour</option>
+                <option value="2">2 Hour</option>
+                <option value="3">3 Hour</option>
+                <option value="4">4 Hour</option>
+                </select>
+            </div>
+            <details>
+                <summary class="font-medium hover:cursor-pointer">
+                Description (optional) :
+                </summary>
+                <textarea name="description" class="mt-3 border rounded p-3 w-full"></textarea>
+            </details>
+            <button type="submit" class="rounded bg-sky-600 hover:bg-sky-500 px-3 py-2 text-white font-semibold text-md">Upload</button>
+            </div>
+        </form>
+        </div>
+
+        <!-- Pricing Section -->
+        <section id="pricing" class="py-12 px-6">
+        <div class="text-center">
+            <h2 class="text-3xl font-bold text-gray-800">Unlock More with storemypdf Pro</h2>
+            <p class="mt-2 text-lg text-gray-600">Enjoy a premium experience with our advanced features and tools.</p>
+        </div>
+        <div class="mx-auto max-w-md px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+            <div class="bg-white rounded-2xl border border-sky-600 p-6 shadow-lg">
+                <div class="text-center">
+                    <h3 class="text-xl font-medium text-gray-900">Pro Plan</h3>
+                    <p class="mt-2 text-4xl font-bold text-gray-900">$5<span class="text-lg font-medium text-gray-700">/month</span></p>
+                    <p class="mt-1 text-sm text-gray-500">( Billed $60/year )</p>
+                </div>
+                <ul class="mt-6 space-y-4 text-gray-700">
+                    <li class="flex items-center gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-indigo-700">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                        <span class="text-sm">64MB Uploads</span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-indigo-700">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                        <span class="text-sm">Unlimited Space</span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-indigo-700">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                        <span class="text-sm">No Ads</span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-indigo-700">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                        <span class="text-sm">API Access</span>
+                    </li>
+                </ul>
+                <a href="#" class="mt-8 block w-full rounded-full border bg-sky-600 px-8 py-3 text-center text-lg font-medium text-white hover:bg-sky-500 focus:outline-none transition duration-300">Get Started</a>
+            </div>
+        </div>
+        </section>
+        <!-- FAQ Section -->
+        <section class="py-12 px-6 bg-gray-50">
+        <div class="max-w-screen-sm mx-auto">
+            <h2 class="text-3xl font-bold text-gray-800 text-center">Frequently Asked Questions</h2>
+            <div class="mt-8 space-y-4">
+                <!-- Question 1 -->
+                <details class="border rounded-lg overflow-hidden">
+                    <summary class="px-4 py-3 bg-gray-200 text-gray-800 font-semibold cursor-pointer">
+                        What types of files can I upload?
+                    </summary>
+                    <div class="px-4 py-2 bg-white text-gray-600">
+                        <p>You can upload PDFs, Word documents, images, and various other file types. If you have a specific file format, please check our supported formats list.</p>
+                    </div>
+                </details>
+                <!-- Question 2 -->
+                <details class="border rounded-lg overflow-hidden">
+                    <summary class="px-4 py-3 bg-gray-200 text-gray-800 font-semibold cursor-pointer">
+                        How do I manage my files?
+                    </summary>
+                    <div class="px-4 py-2 bg-white text-gray-600">
+                        <p>You can organize your files into folders, rename them, and delete or move files as needed using our user-friendly interface.</p>
+                    </div>
+                </details>
+                <!-- Question 3 -->
+                <details class="border rounded-lg overflow-hidden">
+                    <summary class="px-4 py-3 bg-gray-200 text-gray-800 font-semibold cursor-pointer">
+                        Is there a file size limit?
+                    </summary>
+                    <div class="px-4 py-2 bg-white text-gray-600">
+                        <p>Our free plan allows for file uploads up to 25MB, while the Pro plan supports up to 64MB per file. For larger files, consider upgrading to Pro.</p>
+                    </div>
+                </details>
+                <!-- Question 4 -->
+                <details class="border rounded-lg overflow-hidden">
+                    <summary class="px-4 py-3 bg-gray-200 text-gray-800 font-semibold cursor-pointer">
+                        How can I upgrade to Pro?
+                    </summary>
+                    <div class="px-4 py-2 bg-white text-gray-600">
+                        <p>You can upgrade to the Pro plan by visiting our pricing page and selecting the “Get Started” button under the Pro Plan. Follow the prompts to complete the upgrade.</p>
+                    </div>
+                </details>
+            </div>
+        </div>
+        </section>
+        <script>
+            // Get elements
+        const startUploadingButton = document.getElementById('start-uploading-button');
+        const uploadFormContainer = document.getElementById('upload-form-container');
+
+        // Toggle form visibility on button click
+        startUploadingButton.addEventListener('click', () => {
+            if (uploadFormContainer.classList.contains('hidden')) {
+            uploadFormContainer.classList.remove('hidden');
+            } else {
+            uploadFormContainer.classList.add('hidden');
+            }
+        });
+        </script>
+    }
+}
