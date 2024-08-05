@@ -33,5 +33,11 @@ func (app *application) routes() http.Handler {
 
 	r.Post("/upload", app.UploadFile)
 
+	r.Route("/api", func(router chi.Router) {
+		r.Use(app.ApiMiddleware)
+		router.Post("/upload", app.UploadFileApi)
+		router.Get("/files/{file_id}", app.FileInfoApi)
+	})
+
 	return r
 }

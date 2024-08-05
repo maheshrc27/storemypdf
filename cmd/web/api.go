@@ -1,22 +1,31 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/gabriel-vasile/mimetype"
+	"github.com/go-chi/chi/v5"
 	"github.com/maheshrc27/storemypdf/internal/database"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
-func (app *application) UploadFile(w http.ResponseWriter, r *http.Request) {
+func (app *application) UploadFileApi(w http.ResponseWriter, r *http.Request) {
+	userID := r.Header.Get("X-User-ID")
+	userIDInt, err := strconv.Atoi(userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	workDir, _ := os.Getwd()
 
-	err := r.ParseMultipartForm(15 << 20)
+	err = r.ParseMultipartForm(15 << 20)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return
@@ -80,36 +89,30 @@ func (app *application) UploadFile(w http.ResponseWriter, r *http.Request) {
 		fileData.FileType = mtype.String()
 	}
 
-	_, err = app.db.InsertFile(fileData.ID, fileData.FileName, fileData.Description, fileData.FileType, fileData.Size, 0)
+	id, err = app.db.InsertFile(fileData.ID, fileData.FileName, fileData.Description, fileData.FileType, fileData.Size, userIDInt)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	data := map[string]interface{}{
+		"success": true,
+		"file_id": id,
+		"message": "File uploaded successfully.",
+	}
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(200)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonData)
 }
 
-func (app *application) DeleteFile(w http.ResponseWriter, r *http.Request) {
-	workDir, _ := os.Getwd()
-
-	fileid := r.URL.Query().Get("id")
-
-	_, found, err := app.db.GetFile(fileid)
-
-	if !found {
-		http.Error(w, "File Not Found", http.StatusNotFound)
-		return
-	}
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	err = app.db.DeleteFile(fileid)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-
-	err = os.RemoveAll(filepath.Join(workDir, "uploads", fileid))
-	if err != nil {
-		fmt.Println(err)
-	}
+func (app *application) FileInfoApi(w http.ResponseWriter, r *http.Request) {
+	fileId := chi.URLParam(r, "file_id")
+	// todo
 }

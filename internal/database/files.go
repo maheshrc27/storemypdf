@@ -18,7 +18,7 @@ type File struct {
 	Updated     time.Time `db:"updated"`
 }
 
-func (db *DB) InsertFile(id, filename, description, fileType string, size int64, userId int) error {
+func (db *DB) InsertFile(id, filename, description, fileType string, size int64, userId int) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
@@ -28,10 +28,10 @@ func (db *DB) InsertFile(id, filename, description, fileType string, size int64,
 
 	_, err := db.ExecContext(ctx, query, id, filename, description, fileType, size, userId)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return id, nil
 }
 
 func (db *DB) GetFile(id string) (*File, bool, error) {

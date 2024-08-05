@@ -56,6 +56,35 @@ func (app *application) logAccess(next http.Handler) http.Handler {
 	})
 }
 
+func (app *application) ApiMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		apiKey := r.URL.Query().Get("key")
+
+		if apiKey == "" {
+			http.Error(w, "API key is required", http.StatusUnauthorized)
+			return
+		}
+
+		authorized, err := IsAuthorized(apiKey, app.config.cookie.secretKey)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+
+		if authorized {
+			userID, err := ExtractIDFromToken(apiKey, app.config.cookie.secretKey)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusUnauthorized)
+				return
+			}
+			r.Header.Set("X-User-ID", userID)
+		}
+
+		next.ServeHTTP(w, r)
+
+	})
+}
+
 func (app *application) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := cookies.Read(r, "authentication")
