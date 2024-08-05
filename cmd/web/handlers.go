@@ -50,25 +50,11 @@ func (app *application) FileInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fileData := make(map[string]any)
-	if isLoggedIn == "true" {
-		fileData["loggedIn"] = true
-	} else {
-		fileData["loggedIn"] = false
-	}
-	fileData["file_id"] = id
-	fileData["filename"] = fileInfo.FileName
-	fileData["description"] = fileInfo.Description
-	fileData["type"] = fileInfo.FileType
-	fileData["size"] = fileInfo.Size
-	fileData["uploaded"] = fileInfo.Created
+	fileSize := float64(fileInfo.Size) / (1024 * 1024)
 
-	data := app.newTemplateData(fileData)
-
-	err = response.Page(w, http.StatusOK, data, "pages/file_info.tmpl")
-	if err != nil {
-		app.serverError(w, r, err)
-	}
+	home := pages.FIleInfo("store files", false, id, fileInfo.FileName, fileInfo.Description,
+		fileInfo.FileType, fmt.Sprintf("%.2f MB", fileSize), fileInfo.Created.Format("January 2, 2006"))
+	home.Render(context.Background(), w)
 }
 
 func (app *application) ReadFile(w http.ResponseWriter, r *http.Request) {

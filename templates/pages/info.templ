@@ -1,0 +1,63 @@
+package pages
+
+import (
+    "github.com/maheshrc27/storemypdf/templates/components"
+)
+
+templ FIleInfo(title string, isLoggedIn bool, fileId, filename, description, fileType, fileSize, uploaded string) {
+ @components.HtmlWrapper(title) {
+    @components.Header(isLoggedIn)
+    @FileInfoHtml(fileId, filename, description, fileType, fileSize, uploaded)
+ }
+}
+
+templ FileInfoHtml(fileId, filename, description, fileType, fileSize, uploaded string) {
+<section class="py-12 px-6">
+    <div class="max-w-3xl mx-auto p-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- File Details -->
+            <div class="flex flex-col items-center p-8">
+                <img src="https://www.svgrepo.com/show/144578/pdf.svg" alt="PDF Icon" />
+                <a href="#" class="mt-2">{ filename }</a>
+            </div>
+            <!-- Description and Actions -->
+            <div class="flex flex-col gap-6">
+                <div class="flex flex-col gap-2">
+                    <p>{ description }</p>
+                    <p><span class="font-bold text-gray-800">Type:</span> { fileType }</p>
+                    <p><span class="font-bold text-gray-800">Size:</span> { fileSize }</p>
+                    <p><span class="font-bold text-gray-800">Uploaded On:</span> { uploaded }</p>
+                </div>
+                <div class="flex gap-3">
+                    <a href="#" class="flex items-center gap-2 rounded bg-sky-600 px-3 py-2 text-white hover:bg-sky-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" x2="12" y1="15" y2="3" />
+                        </svg>
+                        <span class="font-medium">Download</span>
+                    </a>
+                    <a href="#" class="flex items-center gap-2 rounded bg-sky-600 px-3 py-2 text-white hover:bg-sky-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-arrow-out-up-right">
+                            <path d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6" />
+                            <path d="m21 3-9 9" />
+                            <path d="M15 3h6v6" />
+                        </svg>
+                        <span class="font-medium">Open</span>
+                    </a>
+                </div>
+                <div class="flex gap-1 items-center">
+                    <p class="rounded border bg-stone-200 px-3 py-2 text-gray-600">https://storemypdf/f/{ fileId }</p>
+                    <button class="rounded bg-sky-600 px-3 py-2 text-white hover:bg-sky-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-files">
+                            <path d="M20 7h-3a2 2 0 0 1-2-2V2" />
+                            <path d="M9 18a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h7l4 4v10a2 2 0 0 1-2 2Z" />
+                            <path d="M3 7.6v12.8A1.6 1.6 0 0 0 4.6 22h9.8" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+}

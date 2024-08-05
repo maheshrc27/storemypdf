@@ -2,11 +2,11 @@ package components
 
 templ Layout(title string, isLoggedIn bool) {
     @HtmlWrapper(title) {
-        @header(isLoggedIn)
+        @Header(isLoggedIn)
             <main>
                 { children... }
             </main>
-        @footer()
+        @Footer()
     }
 }
 
