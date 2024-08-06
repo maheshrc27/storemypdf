@@ -27,3 +27,13 @@ func JSONWithHeaders(w http.ResponseWriter, status int, data any, headers http.H
 
 	return nil
 }
+
+func SendError(w http.ResponseWriter, message string, status int) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	response := map[string]interface{}{
+		"success": false,
+		"message": message,
+	}
+	json.NewEncoder(w).Encode(response)
+}

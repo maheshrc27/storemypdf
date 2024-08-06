@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -13,6 +12,7 @@ import (
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/go-chi/chi/v5"
 	"github.com/maheshrc27/storemypdf/internal/database"
+	"github.com/maheshrc27/storemypdf/internal/response"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
@@ -101,15 +101,11 @@ func (app *application) UploadFileApi(w http.ResponseWriter, r *http.Request) {
 		"message": "File uploaded successfully.",
 	}
 
-	jsonData, err := json.Marshal(data)
+	err = response.JSONWithHeaders(w, 200, data, nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	w.WriteHeader(200)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(jsonData)
 }
 
 func (app *application) FileInfoApi(w http.ResponseWriter, r *http.Request) {
@@ -139,15 +135,11 @@ func (app *application) FileInfoApi(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	jsonData, err := json.Marshal(data)
+	err = response.JSONWithHeaders(w, 200, data, nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	w.WriteHeader(200)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(jsonData)
 
 }
 
@@ -193,6 +185,17 @@ func (app *application) FileDeleteApi(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = os.RemoveAll(filepath.Join(workDir, "uploads", fileid))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	data := map[string]interface{}{
+		"success": true,
+		"message": "File deleted successfully.",
+	}
+
+	err = response.JSONWithHeaders(w, 200, data, nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
