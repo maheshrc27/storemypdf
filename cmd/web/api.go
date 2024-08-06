@@ -114,5 +114,87 @@ func (app *application) UploadFileApi(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) FileInfoApi(w http.ResponseWriter, r *http.Request) {
 	fileId := chi.URLParam(r, "file_id")
-	// todo
+
+	fileInfo, found, err := app.db.GetFile(fileId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if !found {
+		http.Error(w, "Page Not Found", http.StatusNotFound)
+		return
+	}
+
+	fileSize := float64(fileInfo.Size) / (1024 * 1024)
+
+	data := map[string]interface{}{
+		"success": true,
+		"file": map[string]interface{}{
+			"id":          fileInfo.ID,
+			"name":        fileInfo.FileName,
+			"type":        fileInfo.FileType,
+			"size":        fileSize,
+			"url":         "http://localhost:4444/f/" + fileInfo.ID,
+			"description": fileInfo.Description,
+		},
+	}
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(200)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonData)
+
+}
+
+func (app *application) FileDownloadApi(w http.ResponseWriter, r *http.Request) {
+	workDir, _ := os.Getwd()
+	fileId := chi.URLParam(r, "file_id")
+
+	fileInfo, found, err := app.db.GetFile(fileId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if !found {
+		http.Error(w, "Page Not Found", http.StatusNotFound)
+		return
+	}
+
+	filepath := filepath.Join(workDir, "uploads", fileId+".pdf")
+
+	w.Header().Set("Content-Disposition", "attachment; filename="+fileInfo.FileName)
+	http.ServeFile(w, r, filepath)
+}
+
+func (app *application) FileDeleteApi(w http.ResponseWriter, r *http.Request) {
+	workDir, _ := os.Getwd()
+
+	fileid := r.URL.Query().Get("file_id")
+
+	_, found, err := app.db.GetFile(fileid)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if !found {
+		http.Error(w, "File Not Found", http.StatusNotFound)
+		return
+	}
+
+	err = app.db.DeleteFile(fileid)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	err = os.RemoveAll(filepath.Join(workDir, "uploads", fileid))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }

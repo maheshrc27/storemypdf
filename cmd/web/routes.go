@@ -15,26 +15,29 @@ func (app *application) routes() http.Handler {
 	r.Use(app.logAccess)
 	r.Use(app.recoverPanic)
 	r.Use(app.securityHeaders)
-	r.Use(app.AuthMiddleware)
 
 	fileServer := http.FileServer(http.FS(assets.EmbeddedFiles))
 	r.Handle("/static/*", fileServer)
 
-	r.Get("/", app.home)
-	r.Get("/api/docs", app.ApiDocs)
-	r.Get("/f/{id}", app.FileInfo)
-	r.Get("/f/{id}/open", app.ReadFile)
+	r.Route("/api", func(router chi.Router) {
+		r.Use(app.AuthMiddleware)
 
-	r.Get("/signup", app.SignUp)
-	r.Post("/signup", app.SignUp)
-	r.Get("/signin", app.SignIn)
-	r.Post("/signin", app.SignIn)
-	r.Post("/signout", app.Logout)
+		router.Get("/", app.home)
+		router.Get("/api/docs", app.ApiDocs)
+		router.Get("/f/{id}", app.FileInfo)
+		router.Get("/f/{id}/open", app.ReadFile)
 
-	r.Post("/upload", app.UploadFile)
+		router.Get("/signup", app.SignUp)
+		router.Post("/signup", app.SignUp)
+		router.Get("/signin", app.SignIn)
+		router.Post("/signin", app.SignIn)
+		router.Post("/signout", app.Logout)
+
+		router.Post("/upload", app.UploadFile)
+	})
 
 	r.Route("/api", func(router chi.Router) {
-		r.Use(app.ApiMiddleware)
+		router.Use(app.ApiMiddleware)
 		router.Post("/upload", app.UploadFileApi)
 		router.Get("/files/{file_id}", app.FileInfoApi)
 	})
