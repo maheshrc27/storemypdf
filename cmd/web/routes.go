@@ -19,27 +19,28 @@ func (app *application) routes() http.Handler {
 	fileServer := http.FileServer(http.FS(assets.EmbeddedFiles))
 	r.Handle("/static/*", fileServer)
 
-	r.Route("/api", func(router chi.Router) {
+	r.Group(func(r chi.Router) {
 		r.Use(app.AuthMiddleware)
 
-		router.Get("/", app.home)
-		router.Get("/api/docs", app.ApiDocs)
-		router.Get("/f/{id}", app.FileInfo)
-		router.Get("/f/{id}/open", app.ReadFile)
+		r.Get("/", app.home)
+		r.Get("/docs", app.ApiDocs)
+		r.Get("/f/{id}", app.FileInfo)
+		r.Get("/f/{id}/open", app.ReadFile)
+		r.Get("/u/uploads", app.ListFiles)
 
-		router.Get("/signup", app.SignUp)
-		router.Post("/signup", app.SignUp)
-		router.Get("/signin", app.SignIn)
-		router.Post("/signin", app.SignIn)
-		router.Post("/signout", app.Logout)
+		r.Get("/signup", app.SignUp)
+		r.Post("/signup", app.SignUp)
+		r.Get("/signin", app.SignIn)
+		r.Post("/signin", app.SignIn)
+		r.Post("/signout", app.Logout)
 
-		router.Post("/upload", app.UploadFile)
+		r.Post("/upload", app.UploadFile)
 	})
 
-	r.Route("/api", func(router chi.Router) {
-		router.Use(app.ApiMiddleware)
-		router.Post("/upload", app.UploadFileApi)
-		router.Get("/files/{file_id}", app.FileInfoApi)
+	r.Route("/api", func(r chi.Router) {
+		r.Use(app.ApiMiddleware)
+		r.Post("/upload", app.UploadFileApi)
+		r.Get("/files/{file_id}", app.FileInfoApi)
 	})
 
 	return r

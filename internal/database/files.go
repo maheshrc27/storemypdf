@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strconv"
 	"time"
 )
 
@@ -53,38 +54,40 @@ func (db *DB) GetFile(id string) (*File, bool, error) {
 	return &image, true, err
 }
 
-func (db *DB) GetFileByUserID(userId string) ([]File, bool, error) {
+func (db *DB) GetFilesByUserID(userId string) ([]File, bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
-	var images []File
+	userID, _ := strconv.Atoi(userId)
+
+	var files []File
 
 	query := `SELECT * FROM files WHERE user_id = $1`
 
-	rows, err := db.QueryContext(ctx, query, userId)
+	rows, err := db.QueryContext(ctx, query, userID)
 	if err != nil {
 		return nil, false, err
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		var img File
-		if err := rows.Scan(&img.ID, &img.FileName, &img.Description,
-			&img.UserID, &img.Created, &img.Updated); err != nil {
-			return images, false, err
+		var file File
+		if err := rows.Scan(&file.ID, &file.FileName, &file.Description, &file.FileType, &file.Size,
+			&file.UserID, &file.Created, &file.Updated); err != nil {
+			return files, false, err
 		}
-		images = append(images, img)
+		files = append(files, file)
 	}
 
 	if err = rows.Err(); err != nil {
 		return nil, false, err
 	}
 
-	if len(images) == 0 {
+	if len(files) == 0 {
 		return nil, false, nil
 	}
 
-	return images, true, nil
+	return files, true, nil
 }
 
 func (db *DB) DeleteFile(id string) error {

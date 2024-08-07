@@ -566,6 +566,10 @@ video {
   inset: 0px;
 }
 
+.bottom-0 {
+  bottom: 0px;
+}
+
 .right-4 {
   right: 1rem;
 }
@@ -663,10 +667,6 @@ video {
   max-width: 1024px;
 }
 
-.max-w-screen-md {
-  max-width: 768px;
-}
-
 .max-w-screen-sm {
   max-width: 640px;
 }
@@ -702,6 +702,10 @@ video {
 
 .justify-between {
   justify-content: space-between;
+}
+
+.justify-around {
+  justify-content: space-around;
 }
 
 .gap-1 {
