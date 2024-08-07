@@ -26,6 +26,8 @@ func (app *application) routes() http.Handler {
 		r.Get("/docs", app.ApiDocs)
 		r.Get("/f/{id}", app.FileInfo)
 		r.Get("/f/{id}/open", app.ReadFile)
+		r.Post("/f/{id}/download", app.FileDownload)
+
 		r.Get("/u/uploads", app.ListFiles)
 
 		r.Get("/signup", app.SignUp)

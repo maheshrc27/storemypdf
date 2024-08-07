@@ -74,3 +74,39 @@ func (app *application) ReadFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func (app *application) ListFiles(w http.ResponseWriter, r *http.Request) {
+	files, found, err := app.db.GetFilesByUserID("0")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if !found {
+		http.Error(w, "No files found", http.StatusNotFound)
+		return
+	}
+
+	lists := pages.ListFiles("uploads lists", false, files)
+	lists.Render(context.Background(), w)
+}
+
+func (app *application) FileDownload(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	workDir, _ := os.Getwd()
+
+	fileInfo, found, err := app.db.GetFile(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if !found {
+		http.Error(w, "Page Not Found", http.StatusNotFound)
+		return
+	}
+
+	filepath := filepath.Join(workDir, "uploads", id+".pdf")
+
+	w.Header().Set("Content-Disposition", "attachment; filename="+fileInfo.FileName)
+	w.Header().Set("Content-Type", fileInfo.FileType)
+	http.ServeFile(w, r, filepath)
+}

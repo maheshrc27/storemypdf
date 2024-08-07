@@ -1,0 +1,47 @@
+package pages
+
+import (
+    "fmt"
+    "github.com/maheshrc27/storemypdf/templates/components"
+    "github.com/maheshrc27/storemypdf/internal/database"
+)
+
+templ ListFiles(title string, isLoggedIn bool, files []database.File) {
+    @components.HtmlWrapper(title) {
+        @components.Header(isLoggedIn)
+        @ListsTableHtml(files)
+    }
+}
+
+templ ListsTableHtml(files []database.File) {
+    <section class="w-full py-12 px-6">
+        <div class="max-w-screen-lg mx-auto overflow-x-auto">
+            <table class="min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
+                <thead>
+                    <tr>
+                        <th class="whitespace-nowrap text-left px-4 py-2 font-medium text-gray-900">ID</th>
+                        <th class="whitespace-nowrap text-left px-4 py-2 font-medium text-gray-900">Filename</th>
+                        <th class="whitespace-nowrap text-left px-4 py-2 font-medium text-gray-900">Description</th>
+                        <th class="whitespace-nowrap text-left px-4 py-2 font-medium text-gray-900">Uploaded</th>
+                        <th class="px-4 py-2"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    for _, file := range files {
+                        <tr>
+                            <td class="whitespace-nowrap px-4 py-2 text-gray-700">{file.ID}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-gray-700">{file.FileName}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-gray-700">{file.Description}</td>
+                            <td class="whitespace-nowrap px-4 py-2 text-gray-700">{file.Created.Format("January 2, 2006")}</td>
+                            <td class="whitespace-nowrap px-4 py-2">
+                                <a href={templ.URL(fmt.Sprintf("/f/%s", file.ID)) } class="inline-block rounded bg-sky-600 px-4 py-2 text-xs font-medium text-white hover:bg-sky-700">
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+}

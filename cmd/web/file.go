@@ -10,7 +10,6 @@ import (
 
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/maheshrc27/storemypdf/internal/database"
-	"github.com/maheshrc27/storemypdf/internal/response"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
@@ -113,17 +112,4 @@ func (app *application) DeleteFile(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}
-}
-
-func (app *application) ListFiles(w http.ResponseWriter, r *http.Request) {
-	files, found, err := app.db.GetFilesByUserID("0")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	if !found {
-		http.Error(w, "No files found", http.StatusNotFound)
-		return
-	}
-	response.JSONWithHeaders(w, 200, files, nil)
 }
