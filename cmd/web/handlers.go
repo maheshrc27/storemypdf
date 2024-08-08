@@ -110,3 +110,8 @@ func (app *application) FileDownload(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", fileInfo.FileType)
 	http.ServeFile(w, r, filepath)
 }
+
+func (app *application) MakePayment(w http.ResponseWriter, r *http.Request) {
+	page := pages.Payment()
+	page.Render(context.Background(), w)
+}

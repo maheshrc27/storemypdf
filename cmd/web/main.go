@@ -3,11 +3,13 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"log/slog"
 	"os"
 	"runtime/debug"
 	"sync"
 
+	"github.com/joho/godotenv"
 	"github.com/maheshrc27/storemypdf/internal/database"
 	"github.com/maheshrc27/storemypdf/internal/env"
 	"github.com/maheshrc27/storemypdf/internal/smtp"
@@ -19,7 +21,12 @@ import (
 func main() {
 	logger := slog.New(tint.NewHandler(os.Stdout, &tint.Options{Level: slog.LevelDebug}))
 
-	err := run(logger)
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatalf("Error loading .env file: %s", err)
+	}
+
+	err = run(logger)
 	if err != nil {
 		trace := string(debug.Stack())
 		logger.Error(err.Error(), "trace", trace)
@@ -62,7 +69,7 @@ func run(logger *slog.Logger) error {
 
 	cfg.baseURL = env.GetString("BASE_URL", "http://localhost:4444")
 	cfg.httpPort = env.GetInt("HTTP_PORT", 4444)
-	cfg.cookie.secretKey = env.GetString("COOKIE_SECRET_KEY", "cvjlkiby2cv45r3jcmrcve5det3it7ej")
+	cfg.cookie.secretKey = env.GetString("COOKIE_SECRET_KEY", os.Getenv("SECRET_KEY"))
 	cfg.db.dsn = env.GetString("DB_DSN", "db.sqlite")
 	cfg.db.automigrate = env.GetBool("DB_AUTOMIGRATE", true)
 	cfg.notifications.email = env.GetString("NOTIFICATIONS_EMAIL", "")

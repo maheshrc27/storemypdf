@@ -18,7 +18,7 @@ type Subscription struct {
 	Updated              time.Time `db:"updated"`
 }
 
-func (db *DB) InsertSubscription(paddleSubscriptionID, paddlePlanID, status string, nextBillDate time.Time, userID string) (int, error) {
+func (db *DB) InsertSubscription(paddleSubscriptionID, paddlePlanID, status string, nextBillDate time.Time, userID int) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 

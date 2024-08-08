@@ -1,0 +1,43 @@
+package pages
+
+templ Payment() {
+    @htmlWrapper() {
+        <section class="w-full py-12 px-6">
+            <div class="max-w-screen-lg mx-auto">
+                <a href="#"
+                class="paddle_button"
+                data-theme="light"
+                data-items='[
+                    {
+                    "priceId": "pri_01hyaxkepp5gyjqmj6vk4bapmz",
+                    "quantity": 1
+                    }
+                ]'>
+                Upgrade Now
+                </a>
+            </div>
+        </section>
+    }
+}
+
+templ htmlWrapper() {
+    <html lang='en'>
+        <head>
+            <meta charset='utf-8'>
+            <title>Upgrade To Pro Plan</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <link rel='stylesheet' href='/static/css/tailwind.css'>
+            <script src="https://unpkg.com/htmx.org@2.0.1"></script>
+            <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+            <script type="text/javascript">
+                Paddle.Environment.set("sandbox");
+                Paddle.Initialize({ 
+                    token: "test_50653d899fd0af5ab9206ee88cc"
+            });
+        </script>
+        </head>
+        <body>
+            { children... }
+        </body>
+    </html>
+}
