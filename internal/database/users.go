@@ -5,10 +5,12 @@ import (
 	"database/sql"
 	"errors"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type User struct {
-	ID             int       `db:"id"`
+	ID             uuid.UUID `db:"id"`
 	Email          string    `db:"email"`
 	HashedPassword string    `db:"hashed_password"`
 	Verified       bool      `db:"verified"`
@@ -16,28 +18,26 @@ type User struct {
 	Updated        time.Time `db:"updated"`
 }
 
-func (db *DB) InsertUser(email, hashedPassword string) (int, error) {
+func (db *DB) InsertUser(email, hashedPassword string) (uuid.UUID, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
+	var id uuid.UUID
+
 	query := `
-		INSERT INTO users (email, hashed_password, verified)
-		VALUES ($1, $2, $3)`
+		INSERT INTO users (created, email, hashed_password, verified)
+		VALUES ($1, $2, $3, $4)
+		RETURNING id`
 
-	result, err := db.ExecContext(ctx, query, email, hashedPassword, false)
+	err := db.GetContext(ctx, &id, query, time.Now(), email, hashedPassword, false)
 	if err != nil {
-		return 0, err
+		return uuid.Nil, err
 	}
 
-	id, err := result.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
-
-	return int(id), err
+	return id, err
 }
 
-func (db *DB) GetUser(id int) (*User, bool, error) {
+func (db *DB) GetUser(id uuid.UUID) (*User, bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 

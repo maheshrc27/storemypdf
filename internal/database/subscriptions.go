@@ -5,10 +5,12 @@ import (
 	"database/sql"
 	"errors"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Subscription struct {
-	ID                   int       `db:"id"`
+	ID                   uuid.UUID `db:"id"`
 	PaddleSubscriptionID string    `db:"paddle_subscription_id"`
 	PaddlePlanID         string    `db:"paddle_plan_id"`
 	Status               string    `db:"status"`
@@ -18,36 +20,33 @@ type Subscription struct {
 	Updated              time.Time `db:"updated"`
 }
 
-func (db *DB) InsertSubscription(paddleSubscriptionID, paddlePlanID, status string, nextBillDate time.Time, userID int) (int, error) {
+func (db *DB) InsertSubscription(paddleSubscriptionID, paddlePlanID, status string, nextBillDate time.Time, userID int) (uuid.UUID, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
+
+	var id uuid.UUID
 
 	query := `
 		INSERT INTO subscriptions (paddle_subscription_id, paddle_plan_id, status, next_bill_date, user_id)
 		VALUES ($1, $2, $3, $4, $5)`
 
-	result, err := db.ExecContext(ctx, query, paddleSubscriptionID, paddlePlanID, status, nextBillDate, userID)
+	err := db.GetContext(ctx, query, paddleSubscriptionID, paddlePlanID, status, nextBillDate, userID)
 	if err != nil {
-		return 0, err
+		return uuid.Nil, err
 	}
 
-	id, err := result.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
-
-	return int(id), err
+	return id, err
 }
 
-func (db *DB) GetSubscriptionByID(paddleSubscriptionID string) (*User, bool, error) {
+func (db *DB) GetSubscriptionByID(paddleSubscriptionID string) (*Subscription, bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
-	var user User
+	var subscription Subscription
 
 	query := `SELECT * FROM subscriptions WHERE paddle_subscription_id = $1`
 
-	err := db.GetContext(ctx, &user, query, paddleSubscriptionID)
+	err := db.GetContext(ctx, &subscription, query, paddleSubscriptionID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, false, nil
@@ -55,25 +54,25 @@ func (db *DB) GetSubscriptionByID(paddleSubscriptionID string) (*User, bool, err
 		return nil, false, err
 	}
 
-	return &user, true, err
+	return &subscription, true, err
 }
 
-func (db *DB) GetSubscriptionByUserID(userID int) (*User, bool, error) {
+func (db *DB) GetSubscriptionByUserID(userID int) (*Subscription, bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
-	var user User
+	var subscription Subscription
 
 	query := `SELECT * FROM subscriptions WHERE user_id = $1`
 
-	err := db.GetContext(ctx, &user, query, userID)
+	err := db.GetContext(ctx, &subscription, query, userID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, false, nil
 		}
 		return nil, false, err
 	}
-	return &user, true, err
+	return &subscription, true, err
 }
 
 func (db *DB) UpdateSubscriptionStatus(status, paddleSubscriptionID string) error {

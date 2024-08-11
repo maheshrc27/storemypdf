@@ -3,32 +3,33 @@ package database
 import (
 	"context"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type ToDelete struct {
-	ID         string    `db:"id"`
-	ImageID    string    `db:"image_id"`
+	ID         uuid.UUID `db:"id"`
+	FileID     string    `db:"image_id"`
 	DeleteTime time.Time `db:"delete_time"`
 	Created    time.Time `db:"created"`
 	Updated    time.Time `db:"updated"`
 }
 
-func (db *DB) InsertToDelete(pdfId string, deleteTime time.Time) (int, error) {
+func (db *DB) InsertToDelete(pdfId string, deleteTime time.Time) (uuid.UUID, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
+	var id uuid.UUID
+
 	query := `
 		INSERT INTO to_deletes (pdf_id, delete_time)
-		VALUES ($1, $2)`
+		VALUES ($1, $2)
+		returning id`
 
-	result, err := db.ExecContext(ctx, query, pdfId, deleteTime)
+	err := db.GetContext(ctx, &id, query, pdfId, deleteTime)
 	if err != nil {
-		return 0, err
-	}
-	id, err := result.LastInsertId()
-	if err != nil {
-		return 0, err
+		return uuid.Nil, err
 	}
 
-	return int(id), err
+	return id, err
 }

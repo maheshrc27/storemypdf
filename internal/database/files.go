@@ -4,8 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"strconv"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type File struct {
@@ -14,12 +15,12 @@ type File struct {
 	Description string    `db:"description"`
 	FileType    string    `db:"file_type"`
 	Size        int64     `db:"size"`
-	UserID      int       `db:"user_id"`
+	UserID      uuid.UUID `db:"user_id"`
 	Created     time.Time `db:"created"`
 	Updated     time.Time `db:"updated"`
 }
 
-func (db *DB) InsertFile(id, filename, description, fileType string, size int64, userId int) (string, error) {
+func (db *DB) InsertFile(id, filename, description, fileType string, size int64, userId uuid.UUID) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
@@ -54,17 +55,15 @@ func (db *DB) GetFile(id string) (*File, bool, error) {
 	return &image, true, err
 }
 
-func (db *DB) GetFilesByUserID(userId string) ([]File, bool, error) {
+func (db *DB) GetFilesByUserID(userId uuid.UUID) ([]File, bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
-
-	userID, _ := strconv.Atoi(userId)
 
 	var files []File
 
 	query := `SELECT * FROM files WHERE user_id = $1`
 
-	rows, err := db.QueryContext(ctx, query, userID)
+	rows, err := db.QueryContext(ctx, query, userId)
 	if err != nil {
 		return nil, false, err
 	}

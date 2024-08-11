@@ -18,7 +18,12 @@ func (app *application) routes() http.Handler {
 	r.Use(app.securityHeaders)
 
 	fileServer := http.FileServer(http.FS(assets.EmbeddedFiles))
+
+	dir := http.Dir("./uploads")
+	uploadsServer := http.FileServer(dir)
+
 	r.Handle("/static/*", fileServer)
+	r.Handle("/uploads/*", http.StripPrefix("/uploads/", uploadsServer))
 
 	r.Group(func(r chi.Router) {
 		r.Use(app.AuthMiddleware)

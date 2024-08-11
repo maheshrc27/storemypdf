@@ -27,16 +27,24 @@ templ ListsTableHtml(files []database.File) {
                     </tr>
                 </thead>
                 <tbody>
-                    for _, file := range files {
+                    if len(files) > 0 {
+                        for _, file := range files {
+                            <tr>
+                                <td class="whitespace-nowrap px-4 py-2 text-gray-700">{file.ID}</td>
+                                <td class="whitespace-nowrap px-4 py-2 text-gray-700">{file.FileName}</td>
+                                <td class="whitespace-nowrap px-4 py-2 text-gray-700">{file.Description}</td>
+                                <td class="whitespace-nowrap px-4 py-2 text-gray-700">{file.Created.Format("January 2, 2006")}</td>
+                                <td class="whitespace-nowrap px-4 py-2">
+                                    <a href={templ.URL(fmt.Sprintf("/f/%s", file.ID)) } class="inline-block rounded bg-sky-600 px-4 py-2 text-xs font-medium text-white hover:bg-sky-700">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    } else {
                         <tr>
-                            <td class="whitespace-nowrap px-4 py-2 text-gray-700">{file.ID}</td>
-                            <td class="whitespace-nowrap px-4 py-2 text-gray-700">{file.FileName}</td>
-                            <td class="whitespace-nowrap px-4 py-2 text-gray-700">{file.Description}</td>
-                            <td class="whitespace-nowrap px-4 py-2 text-gray-700">{file.Created.Format("January 2, 2006")}</td>
-                            <td class="whitespace-nowrap px-4 py-2">
-                                <a href={templ.URL(fmt.Sprintf("/f/%s", file.ID)) } class="inline-block rounded bg-sky-600 px-4 py-2 text-xs font-medium text-white hover:bg-sky-700">
-                                    View
-                                </a>
+                            <td class="px- py-2 text-sm italic">
+                                There is nothing to show.
                             </td>
                         </tr>
                     }

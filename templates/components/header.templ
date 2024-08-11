@@ -22,7 +22,20 @@ templ Header(isLoggedIn bool) {
       
       <!-- Sign In Button -->
       if isLoggedIn {
-        <button hx-post="/signout" onsubmit="reloadPage()" class="font-semibold px-3 py-2 rounded text-white bg-sky-600 hover:bg-sky-500 hidden lg:block">Sign Out</button>
+        <details class="hidden lg:block">
+          <summary class="list-none cursor-pointer flex gap-1 items-center text-md font-medium text-gray-500 hover:text-gray-900">
+            <span>My Account</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down"><path d="m6 9 6 6 6-6"/></svg>
+          </summary>
+          <ul class="absolute py-3 px-5 bg-white rounded drop-shadow-md">
+            <li class="text-md font-medium text-gray-500 hover:text-gray-900 py-1">
+              <a href="/u/uploads">My Uploads</a>
+            </li>
+            <li class="text-md font-medium text-red-600 py-1">
+              <a href="/signout">Sign Out</a>
+            </li>
+          </ul>
+        </details>
       } else {
       <a href="/signin" class="font-semibold px-3 py-2 rounded text-white bg-sky-600 hover:bg-sky-500 hidden lg:block">Sign In</a>
       }
@@ -39,7 +52,12 @@ templ Header(isLoggedIn bool) {
           <a href="/#pricing" class="font-medium text-md text-gray-500 hover:text-gray-900">Pricing</a>
           <a href="/docs" class="font-medium text-md text-gray-500 hover:text-gray-900">API docs</a>
           <a href="#" class="font-medium text-md text-gray-500 hover:text-gray-900">Blog</a>
-          <a href="/signin" class="font-semibold px-3 py-2 rounded text-white bg-sky-600 hover:bg-sky-500">Sign In</a>
+          if isLoggedIn {
+            <a href="/u/uploads" class="font-medium text-md text-gray-500 hover:text-gray-900">My Uploads</a>
+            <a href="/signout" class="font-semibold px-3 py-2 rounded text-white bg-sky-600 hover:bg-sky-500">Sign Out</a>
+          } else {
+            <a href="/signin" class="font-semibold px-3 py-2 rounded text-white bg-sky-600 hover:bg-sky-500">Sign In</a>
+          }
         </div>
       </nav>
     </div>

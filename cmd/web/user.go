@@ -130,7 +130,7 @@ func (app *application) SignIn(w http.ResponseWriter, r *http.Request) {
 
 		expirationTime := time.Now().Add(24 * time.Hour)
 		claims := &Claims{
-			Id: strconv.Itoa(result.ID),
+			Id: result.ID.String(),
 			StandardClaims: jwt.StandardClaims{
 				ExpiresAt: expirationTime.Unix(),
 			},

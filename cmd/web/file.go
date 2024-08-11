@@ -9,14 +9,21 @@ import (
 	"time"
 
 	"github.com/gabriel-vasile/mimetype"
+	"github.com/google/uuid"
 	"github.com/maheshrc27/storemypdf/internal/database"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
 func (app *application) UploadFile(w http.ResponseWriter, r *http.Request) {
+	uid := r.Header.Get("X-User-ID")
+	userId, err := uuid.Parse(uid)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	workDir, _ := os.Getwd()
 
-	err := r.ParseMultipartForm(15 << 20)
+	err = r.ParseMultipartForm(15 << 20)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return
@@ -32,6 +39,7 @@ func (app *application) UploadFile(w http.ResponseWriter, r *http.Request) {
 	var fileData database.File
 	fileData.FileName = header.Filename
 	fileData.Description = r.FormValue("description")
+	fileData.UserID = userId
 
 	id, err := gonanoid.New(12)
 	if err != nil {
@@ -80,11 +88,13 @@ func (app *application) UploadFile(w http.ResponseWriter, r *http.Request) {
 		fileData.FileType = mtype.String()
 	}
 
-	_, err = app.db.InsertFile(fileData.ID, fileData.FileName, fileData.Description, fileData.FileType, fileData.Size, 0)
+	_, err = app.db.InsertFile(fileData.ID, fileData.FileName, fileData.Description, fileData.FileType, fileData.Size, fileData.UserID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	http.Redirect(w, r, "/f/"+fileData.ID, http.StatusSeeOther)
 }
 
 func (app *application) DeleteFile(w http.ResponseWriter, r *http.Request) {

@@ -133,6 +133,7 @@ func ExtractIDFromToken(requestToken string, secret string) (string, error) {
 	}
 
 	id, ok := claims["id"].(string)
+	fmt.Println(id)
 	if !ok {
 		return "", fmt.Errorf("id claim not found")
 	}

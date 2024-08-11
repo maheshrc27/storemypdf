@@ -41,8 +41,7 @@ type config struct {
 		secretKey string
 	}
 	db struct {
-		dsn         string
-		automigrate bool
+		dsn string
 	}
 	notifications struct {
 		email string
@@ -70,8 +69,7 @@ func run(logger *slog.Logger) error {
 	cfg.baseURL = env.GetString("BASE_URL", "http://localhost:4444")
 	cfg.httpPort = env.GetInt("HTTP_PORT", 4444)
 	cfg.cookie.secretKey = env.GetString("COOKIE_SECRET_KEY", os.Getenv("SECRET_KEY"))
-	cfg.db.dsn = env.GetString("DB_DSN", "db.sqlite")
-	cfg.db.automigrate = env.GetBool("DB_AUTOMIGRATE", true)
+	cfg.db.dsn = env.GetString("DB_DSN", "postgres.albangtzckayfyjvyjvu:RFjxfHEHzinWTimL@aws-0-ap-south-1.pooler.supabase.com:6543/postgres")
 	cfg.notifications.email = env.GetString("NOTIFICATIONS_EMAIL", "")
 	cfg.smtp.host = env.GetString("SMTP_HOST", "example.smtp.host")
 	cfg.smtp.port = env.GetInt("SMTP_PORT", 25)
@@ -88,7 +86,7 @@ func run(logger *slog.Logger) error {
 		return nil
 	}
 
-	db, err := database.New(cfg.db.dsn, cfg.db.automigrate)
+	db, err := database.New(cfg.db.dsn)
 	if err != nil {
 		return err
 	}

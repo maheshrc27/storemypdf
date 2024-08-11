@@ -6,23 +6,23 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
 	"time"
 
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/maheshrc27/storemypdf/internal/database"
 	"github.com/maheshrc27/storemypdf/internal/response"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
 func (app *application) UploadFileApi(w http.ResponseWriter, r *http.Request) {
-	userID := r.Header.Get("X-User-ID")
-	userIDInt, err := strconv.Atoi(userID)
+	userId, err := uuid.FromBytes([]byte(r.Header.Get("X-User-ID")))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	workDir, _ := os.Getwd()
 
 	err = r.ParseMultipartForm(15 << 20)
@@ -89,7 +89,7 @@ func (app *application) UploadFileApi(w http.ResponseWriter, r *http.Request) {
 		fileData.FileType = mtype.String()
 	}
 
-	id, err = app.db.InsertFile(fileData.ID, fileData.FileName, fileData.Description, fileData.FileType, fileData.Size, userIDInt)
+	id, err = app.db.InsertFile(fileData.ID, fileData.FileName, fileData.Description, fileData.FileType, fileData.Size, userId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/maheshrc27/storemypdf/internal/response"
 	"github.com/maheshrc27/storemypdf/templates/pages"
 )
@@ -16,11 +17,15 @@ import (
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 	isLoggedIn := r.Header.Get("X-Logged-IN")
-	userId := r.Header.Get("X-User-ID")
-	fmt.Println(isLoggedIn)
-	fmt.Println(userId)
+	// userId := r.Header.Get("X-User-ID")
 
-	home := pages.Home("store files", false)
+	loggedIn := false
+
+	if isLoggedIn == "true" {
+		loggedIn = true
+	}
+
+	home := pages.Home("store files", loggedIn)
 	home.Render(context.Background(), w)
 }
 
@@ -76,13 +81,15 @@ func (app *application) ReadFile(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) ListFiles(w http.ResponseWriter, r *http.Request) {
-	files, found, err := app.db.GetFilesByUserID("0")
+	userId, err := uuid.FromBytes([]byte(r.Header.Get("X-User-ID")))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	if !found {
-		http.Error(w, "No files found", http.StatusNotFound)
+
+	files, _, err := app.db.GetFilesByUserID(userId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
