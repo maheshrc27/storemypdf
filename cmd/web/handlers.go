@@ -40,9 +40,12 @@ func (app *application) ApiDocs(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) FileInfo(w http.ResponseWriter, r *http.Request) {
 	isLoggedIn := r.Header.Get("X-Logged-IN")
-	userId := r.Header.Get("X-User-ID")
-	fmt.Println(isLoggedIn)
-	fmt.Println(userId)
+	loggedIn := false
+
+	if isLoggedIn == "true" {
+		loggedIn = true
+	}
+
 	id := chi.URLParam(r, "id")
 
 	fileInfo, found, err := app.db.GetFile(id)
@@ -57,7 +60,7 @@ func (app *application) FileInfo(w http.ResponseWriter, r *http.Request) {
 
 	fileSize := float64(fileInfo.Size) / (1024 * 1024)
 
-	home := pages.FIleInfo("store files", false, id, fileInfo.FileName, fileInfo.Description,
+	home := pages.FIleInfo("store files", loggedIn, id, fileInfo.FileName, fileInfo.Description,
 		fileInfo.FileType, fmt.Sprintf("%.2f MB", fileSize), fileInfo.Created.Format("January 2, 2006"))
 	home.Render(context.Background(), w)
 }
@@ -81,7 +84,8 @@ func (app *application) ReadFile(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) ListFiles(w http.ResponseWriter, r *http.Request) {
-	userId, err := uuid.FromBytes([]byte(r.Header.Get("X-User-ID")))
+	uid := r.Header.Get("X-User-ID")
+	userId, err := uuid.Parse(uid)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -118,7 +122,18 @@ func (app *application) FileDownload(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, filepath)
 }
 
-func (app *application) MakePayment(w http.ResponseWriter, r *http.Request) {
+func (app *application) Purchase(w http.ResponseWriter, r *http.Request) {
+	isLoggedIn := r.Header.Get("X-Logged-IN")
+	loggedIn := false
+
+	if isLoggedIn == "true" {
+		loggedIn = true
+	} else {
+		http.Redirect(w, r, "/signin", http.StatusSeeOther)
+	}
+
+	fmt.Println(loggedIn)
+
 	page := pages.Payment()
 	page.Render(context.Background(), w)
 }

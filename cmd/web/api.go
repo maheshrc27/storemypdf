@@ -17,7 +17,8 @@ import (
 )
 
 func (app *application) UploadFileApi(w http.ResponseWriter, r *http.Request) {
-	userId, err := uuid.FromBytes([]byte(r.Header.Get("X-User-ID")))
+	uid := r.Header.Get("X-User-ID")
+	userId, err := uuid.Parse(uid)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

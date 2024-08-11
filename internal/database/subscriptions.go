@@ -15,7 +15,7 @@ type Subscription struct {
 	PaddlePlanID         string    `db:"paddle_plan_id"`
 	Status               string    `db:"status"`
 	NextBillDate         time.Time `db:"next_bill_date"`
-	UserID               int       `db:"user_id"`
+	UserID               uuid.UUID `db:"user_id"`
 	Created              time.Time `db:"created"`
 	Updated              time.Time `db:"updated"`
 }
@@ -57,7 +57,7 @@ func (db *DB) GetSubscriptionByID(paddleSubscriptionID string) (*Subscription, b
 	return &subscription, true, err
 }
 
-func (db *DB) GetSubscriptionByUserID(userID int) (*Subscription, bool, error) {
+func (db *DB) GetSubscriptionByUserID(userID uuid.UUID) (*Subscription, bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 

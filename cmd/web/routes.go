@@ -35,7 +35,7 @@ func (app *application) routes() http.Handler {
 		r.Post("/f/{id}/download", app.FileDownload)
 
 		r.Get("/u/uploads", app.ListFiles)
-		r.Get("/u/purchase", app.MakePayment)
+		r.Get("/u/purchase", app.Purchase)
 
 		r.Get("/signup", app.SignUp)
 		r.Post("/signup", app.SignUp)
@@ -59,12 +59,12 @@ func (app *application) routes() http.Handler {
 		}))
 
 		r.Post("/paddle/webhook", app.PaddleWebhook)
-	})
 
-	r.Route("/api", func(r chi.Router) {
-		r.Use(app.ApiMiddleware)
-		r.Post("/upload", app.UploadFileApi)
-		r.Get("/files/{file_id}", app.FileInfoApi)
+		r.Route("/api", func(r chi.Router) {
+			r.Use(app.ApiMiddleware)
+			r.Post("/upload", app.UploadFileApi)
+			r.Get("/files/{file_id}", app.FileInfoApi)
+		})
 	})
 
 	return r

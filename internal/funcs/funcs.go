@@ -11,6 +11,8 @@ import (
 	"time"
 	"unicode"
 
+	"github.com/google/uuid"
+	"github.com/maheshrc27/storemypdf/internal/database"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
@@ -224,3 +226,25 @@ func toInt64(i any) (int64, error) {
 
 	return 0, fmt.Errorf("unable to convert type %T to int", i)
 }
+
+func GuestId(db *database.DB) (uuid.UUID, error) {
+	var user *database.User
+	user, _, err := db.GetUserByEmail("guest@storemypdf.com")
+	if err != nil {
+		return uuid.Nil, err
+	}
+	return user.ID, nil
+}
+
+// func CheckPremium(userId uuid.UUID, db *database.DB) (bool, error) {
+// 	var subscription *database.Subscription
+
+// 	subscription, found, err := db.GetSubscriptionByUserID(userId)
+
+// 	if !found {
+// 		return false, err
+// 	}
+
+// 	if !subscription.Status == "active"
+// 	return true, nil
+// }

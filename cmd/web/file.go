@@ -11,19 +11,38 @@ import (
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/google/uuid"
 	"github.com/maheshrc27/storemypdf/internal/database"
+	"github.com/maheshrc27/storemypdf/internal/funcs"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
 func (app *application) UploadFile(w http.ResponseWriter, r *http.Request) {
 	uid := r.Header.Get("X-User-ID")
-	userId, err := uuid.Parse(uid)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	var userId uuid.UUID
+	var err error
+	var premium = false
+
+	if uid != "" {
+		userId, err = uuid.Parse(uid)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	} else {
+		userId, err = funcs.GuestId(app.db)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
+
 	workDir, _ := os.Getwd()
 
-	err = r.ParseMultipartForm(15 << 20)
+	if premium {
+		err = r.ParseMultipartForm(15 << 20)
+	} else {
+		err = r.ParseMultipartForm(50 << 20)
+	}
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return
