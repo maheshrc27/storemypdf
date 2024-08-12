@@ -1,0 +1,73 @@
+package components
+
+templ DashboardLayout(title string) {
+    @HtmlWrapper(title) {
+        <div class="flex">
+            @Sidebar()
+            <main class="w-full">
+                <div class="py-12 px-6">
+                    { children... }
+                </div>
+            </main>
+        </div>
+    }
+}
+
+templ Sidebar() {
+    <div class="flex h-screen flex-col w-64 justify-between border-e bg-white">
+        <div class="px-4 py-6">
+            <a href="/">
+                <span class="grid h-10 w-32 place-content-center rounded-lg bg-gray-100 text-xs text-gray-600">
+                storemypdf
+                </span>
+            </a>
+
+            <ul class="mt-6 space-y-1">
+                <li>
+                    <a
+                    href="/u/dashboard"
+                    class="block rounded-lg bg-gray-100 px-4 py-2 text-md font-medium text-gray-700"
+                    >
+                    Home
+                    </a>
+                </li>
+
+                <li>
+                    <a
+                    href="/u/files"
+                    class="block rounded-lg px-4 py-2 text-md font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                    >
+                    My Files
+                    </a>
+                </li>
+
+                <li>
+                    <a
+                    href="/u/subscription"
+                    class="block rounded-lg px-4 py-2 text-md font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                    >
+                    Subscription
+                    </a>
+                </li>
+
+                <li>
+                    <a
+                    href="/u/account"
+                    class="block rounded-lg px-4 py-2 text-md font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                    >
+                    Account
+                    </a>
+                </li>
+
+                <li>
+                    <a
+                    href="/logout"
+                    class="block rounded-lg px-4 py-2 text-md font-medium text-red-500 hover:bg-red-100 hover:text-red-700"
+                    >
+                    Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+}

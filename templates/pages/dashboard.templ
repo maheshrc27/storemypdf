@@ -1,0 +1,36 @@
+package pages
+
+import "github.com/maheshrc27/storemypdf/templates/components"
+
+templ Dashboard(title string) {
+    @components.DashboardLayout(title) {
+        <h2 class="text-3xl font-semibold mb-4">Dashboard</h2>
+        <section class="w-full grid grid-cols-3">
+            <div class="rounded shadow-md p-5">
+                <h3 class="text-xl font-semibold mb-4">Upload Files</h3>
+                <form method="POST" action="/upload" enctype="multipart/form-data">
+                    <div class="max-w-screen-sm mx-auto flex flex-col gap-8">
+                    <input type="file" name="file" class="file:mr-5 file:py-2 file:px-3 file:rounded file:font-medium hover:file:cursor-pointer"/>
+                    <div>
+                        <label for="delete_after" class="font-medium">Auto Delete In: </label>
+                        <select name="delete_after" class="px-3 py-2 rounded">
+                        <option value="0">Do not delete</option>
+                        <option value="1">1 Hour</option>
+                        <option value="2">2 Hour</option>
+                        <option value="3">3 Hour</option>
+                        <option value="4">4 Hour</option>
+                        </select>
+                    </div>
+                    <details>
+                        <summary class="font-medium hover:cursor-pointer">
+                        Description (optional) :
+                        </summary>
+                        <textarea name="description" class="mt-3 border rounded p-3 w-full"></textarea>
+                    </details>
+                    <button type="submit" class="rounded bg-sky-600 hover:bg-sky-500 px-3 py-2 text-white font-semibold text-md">Upload</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    }
+}

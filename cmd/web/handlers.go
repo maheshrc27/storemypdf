@@ -124,6 +124,7 @@ func (app *application) FileDownload(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) Purchase(w http.ResponseWriter, r *http.Request) {
 	isLoggedIn := r.Header.Get("X-Logged-IN")
+	userID := r.Header.Get("X-User-ID")
 	loggedIn := false
 
 	if isLoggedIn == "true" {
@@ -134,6 +135,11 @@ func (app *application) Purchase(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println(loggedIn)
 
-	page := pages.Payment()
+	page := pages.Payment(userID)
+	page.Render(context.Background(), w)
+}
+
+func (app *application) UserDashboard(w http.ResponseWriter, r *http.Request) {
+	page := pages.Dashboard("User Dashboard")
 	page.Render(context.Background(), w)
 }

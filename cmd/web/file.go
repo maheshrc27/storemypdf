@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -15,130 +16,171 @@ import (
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
+const (
+	premiumFileSizeLimit        = 50 << 20 // 50 MB
+	standardFileSizeLimit int64 = 15 << 20 // 15 MB
+	uploadDirPermissions        = 0750
+)
+
 func (app *application) UploadFile(w http.ResponseWriter, r *http.Request) {
 	uid := r.Header.Get("X-User-ID")
-	var userId uuid.UUID
-	var err error
-	var premium = false
-
-	if uid != "" {
-		userId, err = uuid.Parse(uid)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	} else {
-		userId, err = funcs.GuestId(app.db)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	}
-
-	workDir, _ := os.Getwd()
-
-	if premium {
-		err = r.ParseMultipartForm(15 << 20)
-	} else {
-		err = r.ParseMultipartForm(50 << 20)
-	}
-
+	userId, err := getUserID(uid, app.db)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusForbidden)
+		handleError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	isPremium, err := funcs.CheckPremium(userId, app.db)
+	if err != nil {
+		handleError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	maxFileSize := standardFileSizeLimit
+	if isPremium {
+		maxFileSize = premiumFileSizeLimit
+	}
+
+	if err := r.ParseMultipartForm(maxFileSize); err != nil {
+		handleError(w, err.Error(), http.StatusForbidden)
 		return
 	}
 
 	file, header, err := r.FormFile("file")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		handleError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	defer file.Close()
 
-	var fileData database.File
-	fileData.FileName = header.Filename
-	fileData.Description = r.FormValue("description")
-	fileData.UserID = userId
+	fileData := database.File{
+		FileName:    header.Filename,
+		Description: r.FormValue("description"),
+		UserID:      userId,
+		Size:        header.Size,
+	}
 
-	id, err := gonanoid.New(12)
+	fileData.ID, err = gonanoid.New(12)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	fileData.ID = id
-
-	if r.Form.Has("delete_after") {
-		hrs := r.Form.Get("delete_after")
-		currTime := time.Now()
-		duration, _ := time.ParseDuration(fmt.Sprintf("%sh", hrs))
-		deleteTime := currTime.Add(duration)
-		app.db.InsertToDelete(id, deleteTime)
-	}
-
-	// Ensure the uploads directory exists
-	uploadDir := filepath.Join(workDir, "uploads")
-	if err := os.MkdirAll(uploadDir, 0750); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		handleError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	ext := filepath.Ext(header.Filename)
-	dst, err := os.Create(filepath.Join(uploadDir, fmt.Sprintf("%s%s", fileData.ID, ext)))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	uploadDir := filepath.Join(getWorkingDir(), "uploads")
+	if err := os.MkdirAll(uploadDir, uploadDirPermissions); err != nil {
+		handleError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	defer dst.Close()
 
-	fileData.Size = int64(header.Size)
-	written, err := io.Copy(dst, file)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	if err := saveFile(uploadDir, fileData.ID, header.Filename, file); err != nil {
+		handleError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	fmt.Println(written)
 
-	// Detect the MIME type of the uploaded file
-	mtype, err := mimetype.DetectFile(filepath.Join(uploadDir, fmt.Sprintf("%s%s", fileData.ID, ext)))
+	fileData.FileType, err = detectFileType(filepath.Join(uploadDir, fileData.ID+filepath.Ext(header.Filename)))
 	if err != nil {
-		fmt.Println("couldn't get file type")
 		fileData.FileType = ""
-	} else {
-		fileData.FileType = mtype.String()
 	}
 
-	_, err = app.db.InsertFile(fileData.ID, fileData.FileName, fileData.Description, fileData.FileType, fileData.Size, fileData.UserID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	if _, err := app.db.InsertFile(fileData.ID, fileData.FileName, fileData.Description, fileData.FileType, fileData.Size, fileData.UserID); err != nil {
+		handleError(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+
+	if deleteAfter := r.FormValue("delete_after"); deleteAfter != "" {
+		if err := handleDeletionTime(deleteAfter, fileData.ID, app.db); err != nil {
+			handleError(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 
 	http.Redirect(w, r, "/f/"+fileData.ID, http.StatusSeeOther)
 }
 
 func (app *application) DeleteFile(w http.ResponseWriter, r *http.Request) {
-	workDir, _ := os.Getwd()
+	workDir, err := os.Getwd()
+	if err != nil {
+		http.Error(w, "Failed to determine working directory", http.StatusInternalServerError)
+		return
+	}
 
-	fileid := r.URL.Query().Get("id")
+	fileID := r.URL.Query().Get("id")
+	if fileID == "" {
+		http.Error(w, "File ID is required", http.StatusBadRequest)
+		return
+	}
 
-	_, found, err := app.db.GetFile(fileid)
-
+	_, found, err := app.db.GetFile(fileID)
+	if err != nil {
+		http.Error(w, "Error checking file existence", http.StatusInternalServerError)
+		return
+	}
 	if !found {
-		http.Error(w, "File Not Found", http.StatusNotFound)
-		return
-	}
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "File not found", http.StatusNotFound)
 		return
 	}
 
-	err = app.db.DeleteFile(fileid)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	if err := app.db.DeleteFile(fileID); err != nil {
+		http.Error(w, "Error deleting file record", http.StatusInternalServerError)
+		return
 	}
 
-	err = os.RemoveAll(filepath.Join(workDir, "uploads", fileid))
-	if err != nil {
-		fmt.Println(err)
+	filePath := filepath.Join(workDir, "uploads", fileID)
+	if err := os.RemoveAll(filePath); err != nil {
+		fmt.Printf("Error removing file from filesystem: %v\n", err)
+		http.Error(w, "Error removing file from filesystem", http.StatusInternalServerError)
+		return
 	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("File successfully deleted"))
+}
+
+func getUserID(uid string, db *database.DB) (uuid.UUID, error) {
+	if uid != "" {
+		return uuid.Parse(uid)
+	}
+	return funcs.GuestId(db)
+}
+
+func handleDeletionTime(deleteAfter string, fileID string, db *database.DB) error {
+	hrs, err := time.ParseDuration(deleteAfter + "h")
+	if err != nil {
+		return fmt.Errorf("invalid delete_after duration: %v", err)
+	}
+	deleteTime := time.Now().Add(hrs)
+
+	_, err = db.InsertToDelete(fileID, deleteTime)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func saveFile(uploadDir, fileID, filename string, file multipart.File) error {
+	ext := filepath.Ext(filename)
+	dst, err := os.Create(filepath.Join(uploadDir, fileID+ext))
+	if err != nil {
+		return err
+	}
+	defer dst.Close()
+	_, err = io.Copy(dst, file)
+	return err
+}
+
+func detectFileType(filePath string) (string, error) {
+	mtype, err := mimetype.DetectFile(filePath)
+	if err != nil {
+		return "", err
+	}
+	return mtype.String(), nil
+}
+
+func getWorkingDir() string {
+	dir, err := os.Getwd()
+	if err != nil {
+		panic(fmt.Sprintf("Failed to get working directory: %v", err))
+	}
+	return dir
 }

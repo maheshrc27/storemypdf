@@ -15,18 +15,18 @@ type ToDelete struct {
 	Updated    time.Time `db:"updated"`
 }
 
-func (db *DB) InsertToDelete(pdfId string, deleteTime time.Time) (uuid.UUID, error) {
+func (db *DB) InsertToDelete(fileId string, deleteTime time.Time) (uuid.UUID, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
 	var id uuid.UUID
 
 	query := `
-		INSERT INTO to_deletes (pdf_id, delete_time)
+		INSERT INTO to_deletes (file_id, delete_time)
 		VALUES ($1, $2)
 		returning id`
 
-	err := db.GetContext(ctx, &id, query, pdfId, deleteTime)
+	err := db.GetContext(ctx, &id, query, fileId, deleteTime)
 	if err != nil {
 		return uuid.Nil, err
 	}

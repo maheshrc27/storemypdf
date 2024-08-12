@@ -236,15 +236,26 @@ func GuestId(db *database.DB) (uuid.UUID, error) {
 	return user.ID, nil
 }
 
-// func CheckPremium(userId uuid.UUID, db *database.DB) (bool, error) {
-// 	var subscription *database.Subscription
+func CheckPremium(userId uuid.UUID, db *database.DB) (bool, error) {
+	subscription, found, err := db.GetSubscriptionByUserID(userId)
+	if err != nil {
+		return false, err
+	}
+	if !found {
+		return false, nil
+	}
 
-// 	subscription, found, err := db.GetSubscriptionByUserID(userId)
+	return isActiveSubscription(subscription), nil
+}
 
-// 	if !found {
-// 		return false, err
-// 	}
-
-// 	if !subscription.Status == "active"
-// 	return true, nil
-// }
+func isActiveSubscription(subscription *database.Subscription) bool {
+	now := time.Now()
+	switch subscription.Status {
+	case "active":
+		return true
+	case "canceled", "past_due", "paused":
+		return subscription.NextBillDate.After(now)
+	default:
+		return false
+	}
+}

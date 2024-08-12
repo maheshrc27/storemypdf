@@ -1,6 +1,10 @@
 package pages
 
-templ Payment() {
+import (
+    "encoding/json"
+)
+
+templ Payment(userID string) {
     @htmlWrapper() {
         <section class="w-full py-12 px-6">
             <div class="max-w-screen-lg mx-auto">
@@ -12,7 +16,10 @@ templ Payment() {
                     "priceId": "pri_01hyaxkepp5gyjqmj6vk4bapmz",
                     "quantity": 1
                     }
-                ]'>
+                ]'
+                data-success-url="/success"
+                data-custom-data={ customData(userID) }
+            >
                 Upgrade Now
                 </a>
             </div>
@@ -33,11 +40,19 @@ templ htmlWrapper() {
                 Paddle.Environment.set("sandbox");
                 Paddle.Initialize({ 
                     token: "test_50653d899fd0af5ab9206ee88cc"
-            });
-        </script>
+                });
+            </script>
         </head>
         <body>
             { children... }
         </body>
     </html>
+}
+
+func customData(userID string) string {
+	customs := map[string]string{
+        "user_id": userID, 
+    }
+	bytes, _ := json.Marshal(customs)
+	return string(bytes)
 }
