@@ -75,12 +75,22 @@ func (db *DB) GetUserByEmail(email string) (*User, bool, error) {
 	return &user, true, err
 }
 
-func (db *DB) UpdateUserHashedPassword(id int, hashedPassword string) error {
+func (db *DB) UpdateUserHashedPassword(id uuid.UUID, hashedPassword string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
 	query := `UPDATE users SET hashed_password = $1, updated = $2 WHERE id = $3`
 
 	_, err := db.ExecContext(ctx, query, hashedPassword, time.Now(), id)
+	return err
+}
+
+func (db *DB) DeleteUser(id uuid.UUID) error {
+	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
+	defer cancel()
+
+	query := `DELETE FROM users WHERE id = $1`
+
+	_, err := db.ExecContext(ctx, query, id)
 	return err
 }

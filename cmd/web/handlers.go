@@ -143,3 +143,8 @@ func (app *application) UserDashboard(w http.ResponseWriter, r *http.Request) {
 	page := pages.Dashboard("User Dashboard")
 	page.Render(context.Background(), w)
 }
+
+func (app *application) UserAccount(w http.ResponseWriter, r *http.Request) {
+	page := pages.Account("Account Settings")
+	page.Render(context.Background(), w)
+}

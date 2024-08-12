@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
 	"github.com/maheshrc27/storemypdf/internal/cookies"
 	"github.com/maheshrc27/storemypdf/internal/request"
 	"github.com/maheshrc27/storemypdf/templates/pages"
@@ -111,7 +112,6 @@ func (app *application) SignIn(w http.ResponseWriter, r *http.Request) {
 		}
 
 		result, found, err := app.db.GetUserByEmail(form.Email)
-		fmt.Println(result)
 		if err != nil {
 			log.Printf("Error fetching user by email: %v", err)
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -171,4 +171,105 @@ func (app *application) Logout(w http.ResponseWriter, r *http.Request) {
 	cookies.Write(w, cookie)
 
 	http.Redirect(w, r, "/", http.StatusAccepted)
+}
+
+func (app *application) ChangePassword(w http.ResponseWriter, r *http.Request) {
+
+	uid := r.Header.Get("X-User-ID")
+	userID, err := uuid.Parse(uid)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	type changePasswordForm struct {
+		OldPassword        string `form:"old_password"`
+		NewPassword        string `form:"new_password"`
+		ConfirmNewPassword string `form:"confirm_new_password"`
+	}
+
+	var form changePasswordForm
+
+	err = request.DecodePostForm(r, &form)
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
+
+	user, found, err := app.db.GetUser(userID)
+	if !found {
+		http.Error(w, "User Not Found", http.StatusBadRequest)
+		return
+	}
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.HashedPassword), []byte(form.OldPassword)); err != nil {
+		http.Error(w, "Wrong Passowrd", http.StatusUnauthorized)
+		return
+	}
+
+	if form.NewPassword != form.ConfirmNewPassword {
+		http.Error(w, "Retype Passowrd do not match", http.StatusBadRequest)
+		return
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(form.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = app.db.UpdateUserHashedPassword(userID, string(hashedPassword))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/u/account", http.StatusAccepted)
+}
+
+func (app *application) DeleteAccount(w http.ResponseWriter, r *http.Request) {
+	uid := r.Header.Get("X-User-ID")
+	userID, err := uuid.Parse(uid)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var password string
+
+	err = request.DecodePostForm(r, &password)
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
+
+	user, found, err := app.db.GetUser(userID)
+	if !found {
+		http.Error(w, "User Not Found", http.StatusBadRequest)
+		return
+	}
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.HashedPassword), []byte(password)); err != nil {
+		http.Error(w, "Wrong Passowrd", http.StatusUnauthorized)
+		return
+	}
+
+	err = app.db.DeleteUser(userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

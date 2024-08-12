@@ -36,7 +36,10 @@ func (app *application) routes() http.Handler {
 
 		r.Get("/u/files", app.ListFiles)
 		r.Get("/u/dashboard", app.UserDashboard)
+		r.Get("/u/account", app.UserAccount)
 		r.Get("/u/purchase", app.Purchase)
+		r.Post("/u/account/change-password", app.ChangePassword)
+		r.Post("/u/account/delete", app.DeleteAccount)
 
 		r.Get("/signup", app.SignUp)
 		r.Post("/signup", app.SignUp)
