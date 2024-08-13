@@ -155,7 +155,7 @@ func (app *application) SignIn(w http.ResponseWriter, r *http.Request) {
 
 		cookies.Write(w, cookie)
 
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/u/dashboard", http.StatusFound)
 	}
 }
 
@@ -170,7 +170,7 @@ func (app *application) Logout(w http.ResponseWriter, r *http.Request) {
 	}
 	cookies.Write(w, cookie)
 
-	http.Redirect(w, r, "/", http.StatusAccepted)
+	http.Redirect(w, r, "/signin", http.StatusSeeOther)
 }
 
 func (app *application) ChangePassword(w http.ResponseWriter, r *http.Request) {
@@ -230,7 +230,7 @@ func (app *application) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/u/account", http.StatusAccepted)
+	http.Redirect(w, r, "/signin", http.StatusSeeOther)
 }
 
 func (app *application) DeleteAccount(w http.ResponseWriter, r *http.Request) {
@@ -241,9 +241,13 @@ func (app *application) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var password string
+	type deleteAccountForm struct {
+		Passowrd string `form:"password"`
+	}
 
-	err = request.DecodePostForm(r, &password)
+	var form deleteAccountForm
+
+	err = request.DecodePostForm(r, &form)
 	if err != nil {
 		app.badRequest(w, r, err)
 		return
@@ -260,7 +264,7 @@ func (app *application) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.HashedPassword), []byte(password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.HashedPassword), []byte(form.Passowrd)); err != nil {
 		http.Error(w, "Wrong Passowrd", http.StatusUnauthorized)
 		return
 	}
@@ -271,5 +275,6 @@ func (app *application) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	app.Logout(w, r)
+
 }

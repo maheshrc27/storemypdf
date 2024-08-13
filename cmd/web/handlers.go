@@ -7,9 +7,11 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+	"github.com/maheshrc27/storemypdf/internal/funcs"
 	"github.com/maheshrc27/storemypdf/internal/response"
 	"github.com/maheshrc27/storemypdf/templates/pages"
 )
@@ -146,5 +148,26 @@ func (app *application) UserDashboard(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) UserAccount(w http.ResponseWriter, r *http.Request) {
 	page := pages.Account("Account Settings")
+	page.Render(context.Background(), w)
+}
+
+func (app *application) Subscription(w http.ResponseWriter, r *http.Request) {
+	uid := r.Header.Get("X-User-ID")
+	userId, err := getUserID(uid, app.db)
+	if err != nil {
+		handleError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	isPremium, err := funcs.CheckPremium(userId, app.db)
+	if err != nil {
+		handleError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var status string = ""
+	var nextBillDate time.Time
+
+	page := pages.Subscription("Subscription Management", isPremium, status, nextBillDate)
 	page.Render(context.Background(), w)
 }

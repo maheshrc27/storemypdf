@@ -20,7 +20,7 @@ type Subscription struct {
 	Updated              time.Time `db:"updated"`
 }
 
-func (db *DB) InsertSubscription(paddleSubscriptionID, paddlePlanID, status string, nextBillDate time.Time, userID int) (uuid.UUID, error) {
+func (db *DB) InsertSubscription(paddleSubscriptionID, paddlePlanID, status string, nextBillDate time.Time, userID uuid.UUID) (uuid.UUID, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
@@ -30,7 +30,7 @@ func (db *DB) InsertSubscription(paddleSubscriptionID, paddlePlanID, status stri
 		INSERT INTO subscriptions (paddle_subscription_id, paddle_plan_id, status, next_bill_date, user_id)
 		VALUES ($1, $2, $3, $4, $5)`
 
-	err := db.GetContext(ctx, query, paddleSubscriptionID, paddlePlanID, status, nextBillDate, userID)
+	err := db.GetContext(ctx, &id, query, paddleSubscriptionID, paddlePlanID, status, nextBillDate, userID)
 	if err != nil {
 		return uuid.Nil, err
 	}

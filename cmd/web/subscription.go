@@ -9,6 +9,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/maheshrc27/storemypdf/internal/database"
 	"github.com/maheshrc27/storemypdf/internal/paddle"
 )
@@ -112,17 +113,25 @@ func handleSubscriptionCreated(db *database.DB, data map[string]interface{}, w h
 		log.Printf("Time couldn't be parsed: %v", err)
 	}
 
-	// customData, ok := data["custom_data"].(map[string]interface{})
-	// if !ok {
-	// 	log.Printf("customData is not a string")
-	// }
+	customData, ok := data["custom_data"].(map[string]interface{})
+	if !ok {
+		log.Printf("customData is not a string")
+	}
 
-	// userId, ok := customData["userId"].(string)
-	// if !ok {
-	// 	log.Printf("userId is not a string")
-	// }
+	fmt.Println(customData)
 
-	_, err = db.InsertSubscription(subscription_id, productId, status, parsedNextBill, 0)
+	uid, ok := customData["user_id"].(string)
+	if !ok {
+		log.Printf("user_id is not a string")
+	}
+
+	userId, err := uuid.Parse(uid)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	_, err = db.InsertSubscription(subscription_id, productId, status, parsedNextBill, userId)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
