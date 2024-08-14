@@ -151,6 +151,11 @@ func (app *application) UserAccount(w http.ResponseWriter, r *http.Request) {
 	page.Render(context.Background(), w)
 }
 
+func (app *application) ApiKeys(w http.ResponseWriter, r *http.Request) {
+	page := pages.ListKeys("API Keys")
+	page.Render(context.Background(), w)
+}
+
 func (app *application) Subscription(w http.ResponseWriter, r *http.Request) {
 	uid := r.Header.Get("X-User-ID")
 	userId, err := getUserID(uid, app.db)

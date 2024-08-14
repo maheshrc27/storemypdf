@@ -33,36 +33,36 @@ templ FileInfoHtml(fileId, filename, description, fileType, fileSize, uploaded s
                     <p><span class="font-bold text-gray-800">Uploaded On:</span> { uploaded }</p>
                 </div>
                 <div class="flex gap-3">
-                    <button id="download-button" hx-post={string(templ.URL(fmt.Sprintf("/f/%s/download", fileId)))} hx-boost="false" hx-swap="none" class="flex items-center gap-2 rounded bg-sky-600 px-3 py-2 text-white hover:bg-sky-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                            <polyline points="7 10 12 15 17 10" />
-                            <line x1="12" x2="12" y1="15" y2="3" />
-                        </svg>
-                        <span class="font-medium">Download</span>
-                    </button>
-                    <script>
-                        document.getElementById('download-button').addEventListener('click', function(event) {
-                            event.preventDefault();
-                            fetch(this.getAttribute('hx-post'), {
-                                method: 'POST',
-                                headers: {
-                                    'Accept': 'application/octet-stream'
-                                }
-                            })
-                            .then(response => response.blob())
-                            .then(blob => {
-                                const url = URL.createObjectURL(blob);
-                                const a = document.createElement('a');
-                                a.href = url;
-                                a.download = 'filename.ext';
-                                document.body.appendChild(a);
-                                a.click();
-                                URL.revokeObjectURL(url);
-                            })
-                            .catch(error => console.error('Error downloading file:', error));
-                        });
-                    </script>
+                    // <button id="download-button" hx-post={string(templ.URL(fmt.Sprintf("/f/%s/download", fileId)))} hx-boost="false" hx-swap="none" class="flex items-center gap-2 rounded bg-sky-600 px-3 py-2 text-white hover:bg-sky-500">
+                    //     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download">
+                    //         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    //         <polyline points="7 10 12 15 17 10" />
+                    //         <line x1="12" x2="12" y1="15" y2="3" />
+                    //     </svg>
+                    //     <span class="font-medium">Download</span>
+                    // </button>
+                    // <script>
+                    //     document.getElementById('download-button').addEventListener('click', function(event) {
+                    //         event.preventDefault();
+                    //         fetch(this.getAttribute('hx-post'), {
+                    //             method: 'POST',
+                    //             headers: {
+                    //                 'Accept': 'application/octet-stream'
+                    //             }
+                    //         })
+                    //         .then(response => response.blob())
+                    //         .then(blob => {
+                    //             const url = URL.createObjectURL(blob);
+                    //             const a = document.createElement('a');
+                    //             a.href = url;
+                    //             a.download = 'filename.ext';
+                    //             document.body.appendChild(a);
+                    //             a.click();
+                    //             URL.revokeObjectURL(url);
+                    //         })
+                    //         .catch(error => console.error('Error downloading file:', error));
+                    //     });
+                    // </script>
                     <a href={templ.URL(fmt.Sprintf("/f/%s/open", fileId)) } target="_blank"  class="flex items-center gap-2 rounded bg-sky-600 px-3 py-2 text-white hover:bg-sky-500">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-arrow-out-up-right">
                             <path d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6" />

@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strings"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/maheshrc27/storemypdf/internal/cookies"
 	"github.com/maheshrc27/storemypdf/internal/response"
+	"github.com/maheshrc27/storemypdf/internal/tokens"
 
 	"github.com/tomasen/realip"
 )
@@ -65,78 +66,49 @@ func (app *application) ApiMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		authorized, err := IsAuthorized(apiKey, app.config.cookie.secretKey)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
+		authorized, err := tokens.IsAuthorized(apiKey, app.config.cookie.secretKey)
+		if err != nil || !authorized {
+			http.Error(w, "Invalid or unauthorized API key", http.StatusUnauthorized)
 			return
 		}
 
-		if authorized {
-			userID, err := ExtractIDFromToken(apiKey, app.config.cookie.secretKey)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusUnauthorized)
-				return
-			}
-			r.Header.Set("X-User-ID", userID)
+		userID, err := tokens.ExtractIDFromToken(apiKey, app.config.cookie.secretKey)
+		if err != nil {
+			http.Error(w, "Error extracting user ID from API key", http.StatusUnauthorized)
+			return
 		}
+		r.Header.Set("X-User-ID", userID)
 
 		next.ServeHTTP(w, r)
-
 	})
 }
 
 func (app *application) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := cookies.Read(r, "authentication")
-		if err == nil && cookie != "" {
-			token := cookie
-			authorized, err := IsAuthorized(token, app.config.cookie.secretKey)
-			if err == nil && authorized {
-				userID, err := ExtractIDFromToken(token, app.config.cookie.secretKey)
-				if err != nil {
-					http.Error(w, err.Error(), http.StatusBadRequest)
-					return
-				}
-				r.Header.Set("X-Logged-IN", "true")
-				r.Header.Set("X-User-ID", userID)
+		cookie, _ := cookies.Read(r, "authentication")
+
+		if strings.HasPrefix(r.URL.Path, "/u") && cookie == "" {
+			http.Redirect(w, r, "/signin", http.StatusSeeOther)
+			return
+		}
+
+		if cookie != "" {
+			authorized, err := tokens.IsAuthorized(cookie, app.config.cookie.secretKey)
+			if err != nil || !authorized {
+				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				return
 			}
+
+			userID, err := tokens.ExtractIDFromToken(cookie, app.config.cookie.secretKey)
+			if err != nil {
+				http.Error(w, "Invalid token", http.StatusBadRequest)
+				return
+			}
+
+			r.Header.Set("X-Logged-IN", "true")
+			r.Header.Set("X-User-ID", userID)
 		}
 
 		next.ServeHTTP(w, r)
 	})
-}
-
-func IsAuthorized(requestToken, secret string) (bool, error) {
-	_, err := jwt.Parse(requestToken, func(token *jwt.Token) (interface{}, error) {
-		return []byte(secret), nil
-	})
-
-	if err != nil {
-		return false, err
-	}
-	return true, nil
-}
-
-func ExtractIDFromToken(requestToken string, secret string) (string, error) {
-	token, err := jwt.Parse(requestToken, func(token *jwt.Token) (interface{}, error) {
-		return []byte(secret), nil
-	})
-
-	if err != nil {
-		return "", err
-	}
-
-	claims, ok := token.Claims.(jwt.MapClaims)
-
-	if !ok || !token.Valid {
-		return "", fmt.Errorf("invalid token")
-	}
-
-	id, ok := claims["id"].(string)
-	fmt.Println(id)
-	if !ok {
-		return "", fmt.Errorf("id claim not found")
-	}
-
-	return id, nil
 }

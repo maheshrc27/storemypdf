@@ -4,30 +4,43 @@ import "github.com/maheshrc27/storemypdf/templates/components"
 
 templ Dashboard(title string) {
     @components.DashboardLayout(title) {
-        <h2 class="text-3xl font-semibold mb-4">Dashboard</h2>
-        <section class="w-full grid grid-cols-3">
+        <section class="w-full">
             <div class="rounded shadow-md p-5">
-                <h3 class="text-xl font-semibold mb-4">Upload Files</h3>
                 <form method="POST" action="/upload" enctype="multipart/form-data">
                     <div class="max-w-screen-sm mx-auto flex flex-col gap-8">
-                    <input type="file" name="file" class="file:mr-5 file:py-2 file:px-3 file:rounded file:font-medium hover:file:cursor-pointer"/>
-                    <div>
-                        <label for="delete_after" class="font-medium">Auto Delete In: </label>
-                        <select name="delete_after" class="px-3 py-2 rounded">
-                        <option value="0">Do not delete</option>
-                        <option value="1">1 Hour</option>
-                        <option value="2">2 Hour</option>
-                        <option value="3">3 Hour</option>
-                        <option value="4">4 Hour</option>
-                        </select>
-                    </div>
-                    <details>
-                        <summary class="font-medium hover:cursor-pointer">
-                        Description (optional) :
-                        </summary>
-                        <textarea name="description" class="mt-3 border rounded p-3 w-full"></textarea>
-                    </details>
-                    <button type="submit" class="rounded bg-sky-600 hover:bg-sky-500 px-3 py-2 text-white font-semibold text-md">Upload</button>
+                        <div class="font-[sans-serif] max-w-md mx-auto">
+                            <input type="file" id="InputFile" name="file" class="w-full text-gray-400 font-semibold text-sm bg-white border file:cursor-pointer cursor-pointer file:border-0 file:py-2.5 file:px-4 file:mr-4 file:bg-gray-100 file:hover:bg-gray-200 file:text-gray-600 rounded" />
+
+                            <label for="InputFile"
+                                class="mt-5 bg-gray-50 text-gray-600 text-base rounded w-full h-48 flex flex-col items-center justify-center border-2 border-gray-300 border-dashed cursor-pointer">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-12 mb-2 fill-gray-400" viewBox="0 0 32 32">
+                                <path
+                                    d="M23.75 11.044a7.99 7.99 0 0 0-15.5-.009A8 8 0 0 0 9 27h3a1 1 0 0 0 0-2H9a6 6 0 0 1-.035-12 1.038 1.038 0 0 0 1.1-.854 5.991 5.991 0 0 1 11.862 0A1.08 1.08 0 0 0 23 13a6 6 0 0 1 0 12h-3a1 1 0 0 0 0 2h3a8 8 0 0 0 .75-15.956z"
+                                    data-original="#000000" />
+                                <path
+                                    d="M20.293 19.707a1 1 0 0 0 1.414-1.414l-5-5a1 1 0 0 0-1.414 0l-5 5a1 1 0 0 0 1.414 1.414L15 16.414V29a1 1 0 0 0 2 0V16.414z"
+                                    data-original="#000000" />
+                                </svg>
+                                <p class="text-base font-semibold text-gray-600">Drag & Drop files here</p>
+                            </label>
+                            </div>
+                        <div class="flex items-center gap-4">
+                            <label for="delete_after" class="font-medium text-gray-700">Auto Delete In:</label>
+                            <select id="delete_after" name="delete_after" class="px-3 py-2 rounded border border-gray-300">
+                                <option value="0">Do not delete</option>
+                                <option value="1">1 Hour</option>
+                                <option value="2">2 Hours</option>
+                                <option value="3">3 Hours</option>
+                                <option value="4">4 Hours</option>
+                            </select>
+                        </div>
+                        <details>
+                            <summary class="font-medium text-gray-700 hover:cursor-pointer">
+                            Description (optional) :
+                            </summary>
+                            <textarea name="description" class="mt-3 border rounded p-3 w-full"></textarea>
+                        </details>
+                        <button type="submit" class="rounded bg-sky-600 hover:bg-sky-500 px-3 py-2 text-white font-semibold text-md">Upload</button>
                     </div>
                 </form>
             </div>

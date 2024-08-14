@@ -202,3 +202,24 @@ func (app *application) FileDeleteApi(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func (app *application) GenerateApiKey(w http.ResponseWriter, r *http.Request) {
+
+	uid := r.Header.Get("X-User-ID")
+
+	userID, err := uuid.Parse(uid)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	key := uuid.New().String()
+
+	id, err := app.db.InsertKey(key, userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Println(id)
+}

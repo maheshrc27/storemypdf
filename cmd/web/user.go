@@ -8,15 +8,26 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 	"github.com/maheshrc27/storemypdf/internal/cookies"
 	"github.com/maheshrc27/storemypdf/internal/request"
+	"github.com/maheshrc27/storemypdf/internal/tokens"
 	"github.com/maheshrc27/storemypdf/templates/pages"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func (app *application) SignUp(w http.ResponseWriter, r *http.Request) {
+
+	isLoggedIn := r.Header.Get("X-Logged-IN")
+	if isLoggedIn != "" {
+		loggedIn, err := strconv.ParseBool(isLoggedIn)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+		if loggedIn {
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+		}
+	}
 
 	type createAccountForm struct {
 		Email           string `form:"email"`
@@ -92,11 +103,6 @@ func (app *application) SignIn(w http.ResponseWriter, r *http.Request) {
 		Password string `form:"password"`
 	}
 
-	type Claims struct {
-		Id string `json:"id"`
-		jwt.StandardClaims
-	}
-
 	switch r.Method {
 	case http.MethodGet:
 		signin := pages.SignIn("Sign In to your Account")
@@ -128,16 +134,7 @@ func (app *application) SignIn(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		expirationTime := time.Now().Add(24 * time.Hour)
-		claims := &Claims{
-			Id: result.ID.String(),
-			StandardClaims: jwt.StandardClaims{
-				ExpiresAt: expirationTime.Unix(),
-			},
-		}
-
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-		tokenString, err := token.SignedString([]byte(app.config.cookie.secretKey))
+		tokenString, err := tokens.GenerateJWT(result.ID.String(), app.config.cookie.secretKey)
 		if err != nil {
 			log.Printf("Error signing JWT: %v", err)
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -148,7 +145,7 @@ func (app *application) SignIn(w http.ResponseWriter, r *http.Request) {
 			Name:     "authentication",
 			Value:    tokenString,
 			Path:     "/",
-			MaxAge:   int(time.Until(expirationTime).Seconds()),
+			MaxAge:   int(time.Until(time.Now().Add(24 * time.Hour)).Seconds()),
 			HttpOnly: true,
 			Secure:   false,
 		}
