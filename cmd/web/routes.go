@@ -30,9 +30,9 @@ func (app *application) routes() http.Handler {
 
 		r.Get("/", app.home)
 		r.Get("/docs", app.ApiDocs)
-		r.Get("/f/{id}", app.FileInfo)
-		r.Get("/f/{id}/open", app.ReadFile)
-		r.Post("/f/{id}/download", app.FileDownload)
+		r.Get("/f/{fileid}", app.FileInfo)
+		r.Get("/f/{fileid}/open", app.ReadFile)
+		r.Post("/f/{fileid}/download", app.DownloadFile)
 
 		r.Get("/u/files", app.ListFiles)
 		r.Get("/u/dashboard", app.UserDashboard)
@@ -58,7 +58,7 @@ func (app *application) routes() http.Handler {
 			// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
 			AllowedOrigins: []string{"https://*", "http://*"},
 			// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
-			AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+			AllowedMethods:   []string{"POST"},
 			AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 			ExposedHeaders:   []string{"Link"},
 			AllowCredentials: false,
@@ -70,7 +70,7 @@ func (app *application) routes() http.Handler {
 		r.Route("/api", func(r chi.Router) {
 			r.Use(app.ApiMiddleware)
 			r.Post("/upload", app.UploadFileApi)
-			r.Get("/files/{file_id}", app.FileInfoApi)
+			// r.Get("/files/{file_id}", app.FileInfoApi)
 		})
 	})
 

@@ -11,8 +11,6 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/google/uuid"
-	"github.com/maheshrc27/storemypdf/internal/database"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
@@ -225,37 +223,4 @@ func toInt64(i any) (int64, error) {
 	}
 
 	return 0, fmt.Errorf("unable to convert type %T to int", i)
-}
-
-func GuestId(db *database.DB) (uuid.UUID, error) {
-	var user *database.User
-	user, _, err := db.GetUserByEmail("guest@storemypdf.com")
-	if err != nil {
-		return uuid.Nil, err
-	}
-	return user.ID, nil
-}
-
-func CheckPremium(userId uuid.UUID, db *database.DB) (bool, error) {
-	subscription, found, err := db.GetSubscriptionByUserID(userId)
-	if err != nil {
-		return false, err
-	}
-	if !found {
-		return false, nil
-	}
-
-	return isActiveSubscription(subscription), nil
-}
-
-func isActiveSubscription(subscription *database.Subscription) bool {
-	now := time.Now()
-	switch subscription.Status {
-	case "active":
-		return true
-	case "canceled", "past_due", "paused":
-		return subscription.NextBillDate.After(now)
-	default:
-		return false
-	}
 }

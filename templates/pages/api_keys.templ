@@ -3,26 +3,32 @@ package pages
 import (
     // "fmt"
     "github.com/maheshrc27/storemypdf/templates/components"
-    // "github.com/maheshrc27/storemypdf/internal/database"
+    "github.com/maheshrc27/storemypdf/internal/database"
 )
 
-templ ListKeys(title string) {
+templ ListKeys(title string, keys []database.Key) {
     @components.DashboardLayout(title) {
-        @KeysHtml()
+        @KeysHtml(keys)
     }
 }
 
-templ KeysHtml() {
+templ KeysHtml(keys []database.Key) {
     <section class="w-full">
         <h3 class="text-3xl font-semibold mb-4">API Keys</h3>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="flex flex-col gap-5 border rounded-lg p-5">
-                <h4 class="text-lg text-gray-700 font-semibold">API Key</h4>
-                <span class="w-full border rounded px-3 py-2 bg-stone-200 text-gray-700 overflow-auto">
-                    vhdfhwif94-dwdfhdfhjiewpe8w4hejc-jiehfddfghjkjhgfcxcvbnmnbvc
-                </span>
-                <button type="button" class="px-3 py-2 bg-red-500 rounded text-white">Delete</button>
-            </div>
+            if len(keys) > 0 {
+                for _, key := range keys {
+                    <div class="flex flex-col gap-5 border rounded-lg p-5">
+                        <h4 class="text-lg text-gray-700 font-semibold">API Key</h4>
+                        <span class="w-full border rounded px-3 py-2 bg-stone-200 text-gray-700 overflow-auto">
+                            { key.ApiKeyHash }
+                        </span>
+                        <button type="button" class="px-3 py-2 bg-red-500 rounded text-white">Delete</button>
+                    </div>
+                }
+            } else {
+                <button type="button" hx-post="/u/generate-api-key">Generate API Key</button>
+            }
         </div>
     </section>
 }

@@ -6,7 +6,7 @@
 The `storemypdf` API provides endpoints for uploading, retrieving, and downloading files. This document describes how to use the API.
 
 **Base URL:**  
-`https://storemypdf/api`
+`https://storemypdf.com/api`
 
 ## Authentication
 

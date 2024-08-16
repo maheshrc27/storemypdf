@@ -29,7 +29,7 @@ func (db *DB) InsertKey(keyHash string, userID uuid.UUID) (int8, error) {
 		VALUES ($1, $2)
 		RETURNING id`
 
-	err := db.GetContext(ctx, &id, query, time.Now(), keyHash, userID)
+	err := db.GetContext(ctx, &id, query, keyHash, userID)
 	if err != nil {
 		return 0, err
 	}
@@ -37,7 +37,7 @@ func (db *DB) InsertKey(keyHash string, userID uuid.UUID) (int8, error) {
 	return id, err
 }
 
-func (db *DB) GetKey(id uuid.UUID) (*Key, bool, error) {
+func (db *DB) GetKey(id int8) (*Key, bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
@@ -54,6 +54,59 @@ func (db *DB) GetKey(id uuid.UUID) (*Key, bool, error) {
 	}
 
 	return &key, true, err
+}
+
+func (db *DB) GetUserIDByKey(key string) (string, bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
+	defer cancel()
+
+	var userid string
+
+	query := `SELECT user_id FROM api_keys WHERE api_key_hash = $1`
+
+	err := db.GetContext(ctx, &userid, query, key)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", false, nil
+		}
+		return "", false, err
+	}
+
+	return userid, true, err
+}
+
+func (db *DB) GetKeysByUserID(userId uuid.UUID) ([]Key, bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
+	defer cancel()
+
+	var keys []Key
+
+	query := `SELECT * FROM api_keys WHERE user_id = $1`
+
+	rows, err := db.QueryContext(ctx, query, userId)
+	if err != nil {
+		return nil, false, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var key Key
+		if err := rows.Scan(&key.ID, &key.ApiKeyHash, &key.UserID, &key.Active,
+			&key.Created, &key.Updated); err != nil {
+			return keys, false, err
+		}
+		keys = append(keys, key)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, false, err
+	}
+
+	if len(keys) == 0 {
+		return nil, false, nil
+	}
+
+	return keys, true, nil
 }
 
 func (db *DB) UpdateKeyHash(id int8, keyHash string) error {

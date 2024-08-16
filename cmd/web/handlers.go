@@ -7,50 +7,27 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/google/uuid"
-	"github.com/maheshrc27/storemypdf/internal/funcs"
-	"github.com/maheshrc27/storemypdf/internal/response"
 	"github.com/maheshrc27/storemypdf/templates/pages"
 )
 
+// front pages
+
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-
-	isLoggedIn := r.Header.Get("X-Logged-IN")
-	// userId := r.Header.Get("X-User-ID")
-
-	loggedIn := false
-
-	if isLoggedIn == "true" {
-		loggedIn = true
-	}
-
-	home := pages.Home("store files", loggedIn)
+	home := pages.Home("store files", GetAuthStatus(r))
 	home.Render(context.Background(), w)
 }
 
 func (app *application) ApiDocs(w http.ResponseWriter, r *http.Request) {
-	data := app.newTemplateData(r)
-
-	err := response.Page(w, http.StatusOK, data, "pages/docs.tmpl")
-	if err != nil {
-		app.serverError(w, r, err)
-	}
+	page := pages.Docs("Account Settings", GetAuthStatus(r))
+	page.Render(context.Background(), w)
 }
 
 func (app *application) FileInfo(w http.ResponseWriter, r *http.Request) {
-	isLoggedIn := r.Header.Get("X-Logged-IN")
-	loggedIn := false
+	fileid := chi.URLParam(r, "fileid")
 
-	if isLoggedIn == "true" {
-		loggedIn = true
-	}
-
-	id := chi.URLParam(r, "id")
-
-	fileInfo, found, err := app.db.GetFile(id)
+	fileInfo, found, err := app.db.GetFile(fileid)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -62,15 +39,15 @@ func (app *application) FileInfo(w http.ResponseWriter, r *http.Request) {
 
 	fileSize := float64(fileInfo.Size) / (1024 * 1024)
 
-	home := pages.FIleInfo("store files", loggedIn, id, fileInfo.FileName, fileInfo.Description,
+	page := pages.FIleInfo(fileInfo.FileName, GetAuthStatus(r), fileid, fileInfo.FileName, fileInfo.Description,
 		fileInfo.FileType, fmt.Sprintf("%.2f MB", fileSize), fileInfo.Created.Format("January 2, 2006"))
-	home.Render(context.Background(), w)
+	page.Render(context.Background(), w)
 }
 
 func (app *application) ReadFile(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
+	fileid := chi.URLParam(r, "fileid")
 	workDir, _ := os.Getwd()
-	f, err := os.Open(filepath.Join(workDir, "uploads", id+".pdf"))
+	f, err := os.Open(filepath.Join(workDir, "uploads", fileid+".pdf"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -85,9 +62,11 @@ func (app *application) ReadFile(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//dashboard pages
+
 func (app *application) ListFiles(w http.ResponseWriter, r *http.Request) {
-	uid := r.Header.Get("X-User-ID")
-	userId, err := uuid.Parse(uid)
+
+	userId, err := ParseUserID(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -99,45 +78,16 @@ func (app *application) ListFiles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lists := pages.ListFiles("uploads lists", false, files)
-	lists.Render(context.Background(), w)
-}
+	page := pages.ListFiles("uploads lists", files)
+	page.Render(context.Background(), w)
 
-func (app *application) FileDownload(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	workDir, _ := os.Getwd()
-
-	fileInfo, found, err := app.db.GetFile(id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	if !found {
-		http.Error(w, "Page Not Found", http.StatusNotFound)
-		return
-	}
-
-	filepath := filepath.Join(workDir, "uploads", id+".pdf")
-
-	w.Header().Set("Content-Disposition", "attachment; filename="+fileInfo.FileName)
-	w.Header().Set("Content-Type", fileInfo.FileType)
-	http.ServeFile(w, r, filepath)
 }
 
 func (app *application) Purchase(w http.ResponseWriter, r *http.Request) {
-	isLoggedIn := r.Header.Get("X-Logged-IN")
-	userID := r.Header.Get("X-User-ID")
-	loggedIn := false
 
-	if isLoggedIn == "true" {
-		loggedIn = true
-	} else {
-		http.Redirect(w, r, "/signin", http.StatusSeeOther)
-	}
+	userId := r.Header.Get("X-User-ID")
 
-	fmt.Println(loggedIn)
-
-	page := pages.Payment(userID)
+	page := pages.Payment(userId)
 	page.Render(context.Background(), w)
 }
 
@@ -152,27 +102,38 @@ func (app *application) UserAccount(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) ApiKeys(w http.ResponseWriter, r *http.Request) {
-	page := pages.ListKeys("API Keys")
+	userId, err := ParseUserID(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	keys, _, err := app.db.GetKeysByUserID(userId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	page := pages.ListKeys("API Keys", keys)
 	page.Render(context.Background(), w)
 }
 
 func (app *application) Subscription(w http.ResponseWriter, r *http.Request) {
-	uid := r.Header.Get("X-User-ID")
-	userId, err := getUserID(uid, app.db)
+	userId, err := ParseUserID(r)
 	if err != nil {
 		handleError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	isPremium, err := funcs.CheckPremium(userId, app.db)
+	subscription, premium, err := CheckPremium(userId, app.db)
 	if err != nil {
 		handleError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	var status string = ""
-	var nextBillDate time.Time
+	status := subscription.Status
+	nextbilldate := subscription.NextBillDate.Format("January 2, 2006")
 
-	page := pages.Subscription("Subscription Management", isPremium, status, nextBillDate)
+	page := pages.Subscription("Subscription Management", premium, status, nextbilldate)
 	page.Render(context.Background(), w)
 }

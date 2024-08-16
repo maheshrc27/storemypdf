@@ -38,7 +38,26 @@ func (db *DB) InsertSubscription(paddleSubscriptionID, paddlePlanID, status stri
 	return id, err
 }
 
-func (db *DB) GetSubscriptionByID(paddleSubscriptionID string) (*Subscription, bool, error) {
+func (db *DB) GetSubscriptionByID(subscriptionId uuid.UUID) (*Subscription, bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
+	defer cancel()
+
+	var subscription Subscription
+
+	query := `SELECT * FROM subscriptions WHERE id = $1`
+
+	err := db.GetContext(ctx, &subscription, query, subscriptionId)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, false, nil
+		}
+		return nil, false, err
+	}
+
+	return &subscription, true, err
+}
+
+func (db *DB) GetSubscriptionByPID(paddleSubscriptionID string) (*Subscription, bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 

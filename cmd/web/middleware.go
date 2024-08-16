@@ -66,17 +66,18 @@ func (app *application) ApiMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		authorized, err := tokens.IsAuthorized(apiKey, app.config.cookie.secretKey)
-		if err != nil || !authorized {
-			http.Error(w, "Invalid or unauthorized API key", http.StatusUnauthorized)
+		userID, found, err := app.db.GetUserIDByKey(apiKey)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		userID, err := tokens.ExtractIDFromToken(apiKey, app.config.cookie.secretKey)
-		if err != nil {
-			http.Error(w, "Error extracting user ID from API key", http.StatusUnauthorized)
+		if !found {
+			http.Error(w, "Unauthorized Api Key", http.StatusUnauthorized)
 			return
 		}
+
 		r.Header.Set("X-User-ID", userID)
 
 		next.ServeHTTP(w, r)
@@ -87,7 +88,7 @@ func (app *application) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookie, _ := cookies.Read(r, "authentication")
 
-		if strings.HasPrefix(r.URL.Path, "/u") && cookie == "" {
+		if strings.HasPrefix(r.URL.Path, "/u/") && cookie == "" {
 			http.Redirect(w, r, "/signin", http.StatusSeeOther)
 			return
 		}

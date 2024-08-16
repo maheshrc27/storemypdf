@@ -9,16 +9,16 @@ import (
 	"time"
 
 	"github.com/gabriel-vasile/mimetype"
-	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/maheshrc27/storemypdf/internal/database"
 	"github.com/maheshrc27/storemypdf/internal/response"
 	gonanoid "github.com/matoous/go-nanoid/v2"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func (app *application) UploadFileApi(w http.ResponseWriter, r *http.Request) {
-	uid := r.Header.Get("X-User-ID")
-	userId, err := uuid.Parse(uid)
+
+	userId, err := ParseUserID(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -26,7 +26,7 @@ func (app *application) UploadFileApi(w http.ResponseWriter, r *http.Request) {
 
 	workDir, _ := os.Getwd()
 
-	err = r.ParseMultipartForm(15 << 20)
+	err = r.ParseMultipartForm(64 << 20)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return
@@ -97,103 +97,11 @@ func (app *application) UploadFileApi(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := map[string]interface{}{
-		"success": true,
-		"file_id": id,
-		"message": "File uploaded successfully.",
-	}
-
-	err = response.JSONWithHeaders(w, 200, data, nil)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
-func (app *application) FileInfoApi(w http.ResponseWriter, r *http.Request) {
-	fileId := chi.URLParam(r, "file_id")
-
-	fileInfo, found, err := app.db.GetFile(fileId)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	if !found {
-		http.Error(w, "Page Not Found", http.StatusNotFound)
-		return
-	}
-
-	fileSize := float64(fileInfo.Size) / (1024 * 1024)
-
-	data := map[string]interface{}{
-		"success": true,
-		"file": map[string]interface{}{
-			"id":          fileInfo.ID,
-			"name":        fileInfo.FileName,
-			"type":        fileInfo.FileType,
-			"size":        fileSize,
-			"url":         "http://localhost:4444/f/" + fileInfo.ID,
-			"description": fileInfo.Description,
-		},
-	}
-
-	err = response.JSONWithHeaders(w, 200, data, nil)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-}
-
-func (app *application) FileDownloadApi(w http.ResponseWriter, r *http.Request) {
-	workDir, _ := os.Getwd()
-	fileId := chi.URLParam(r, "file_id")
-
-	fileInfo, found, err := app.db.GetFile(fileId)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	if !found {
-		http.Error(w, "Page Not Found", http.StatusNotFound)
-		return
-	}
-
-	filepath := filepath.Join(workDir, "uploads", fileId+".pdf")
-
-	w.Header().Set("Content-Disposition", "attachment; filename="+fileInfo.FileName)
-	http.ServeFile(w, r, filepath)
-}
-
-func (app *application) FileDeleteApi(w http.ResponseWriter, r *http.Request) {
-	workDir, _ := os.Getwd()
-
-	fileid := r.URL.Query().Get("file_id")
-
-	_, found, err := app.db.GetFile(fileid)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if !found {
-		http.Error(w, "File Not Found", http.StatusNotFound)
-		return
-	}
-
-	err = app.db.DeleteFile(fileid)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-
-	err = os.RemoveAll(filepath.Join(workDir, "uploads", fileid))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	data := map[string]interface{}{
-		"success": true,
-		"message": "File deleted successfully.",
+		"success":    true,
+		"file_id":    id,
+		"url_viewer": "storemypdf.com/f/" + id,
+		"url":        "files.storemypadf.com/" + id + ".pdf",
+		"message":    "File uploaded successfully",
 	}
 
 	err = response.JSONWithHeaders(w, 200, data, nil)
@@ -205,9 +113,7 @@ func (app *application) FileDeleteApi(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) GenerateApiKey(w http.ResponseWriter, r *http.Request) {
 
-	uid := r.Header.Get("X-User-ID")
-
-	userID, err := uuid.Parse(uid)
+	userID, err := ParseUserID(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -215,7 +121,13 @@ func (app *application) GenerateApiKey(w http.ResponseWriter, r *http.Request) {
 
 	key := uuid.New().String()
 
-	id, err := app.db.InsertKey(key, userID)
+	keyhash, err := bcrypt.GenerateFromPassword([]byte(key), bcrypt.DefaultCost)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	id, err := app.db.InsertKey(string(keyhash), userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -223,3 +135,99 @@ func (app *application) GenerateApiKey(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println(id)
 }
+
+// func (app *application) FileInfoApi(w http.ResponseWriter, r *http.Request) {
+// 	fileId := chi.URLParam(r, "file_id")
+
+// 	fileInfo, found, err := app.db.GetFile(fileId)
+// 	if err != nil {
+// 		http.Error(w, err.Error(), http.StatusInternalServerError)
+// 		return
+// 	}
+// 	if !found {
+// 		http.Error(w, "Page Not Found", http.StatusNotFound)
+// 		return
+// 	}
+
+// 	fileSize := float64(fileInfo.Size) / (1024 * 1024)
+
+// 	data := map[string]interface{}{
+// 		"success": true,
+// 		"file": map[string]interface{}{
+// 			"id":          fileInfo.ID,
+// 			"name":        fileInfo.FileName,
+// 			"type":        fileInfo.FileType,
+// 			"size":        fileSize,
+// 			"url":         "http://localhost:4444/f/" + fileInfo.ID,
+// 			"description": fileInfo.Description,
+// 		},
+// 	}
+
+// 	err = response.JSONWithHeaders(w, 200, data, nil)
+// 	if err != nil {
+// 		http.Error(w, err.Error(), http.StatusInternalServerError)
+// 		return
+// 	}
+
+// }
+
+// func (app *application) FileDeleteApi(w http.ResponseWriter, r *http.Request) {
+// 	workDir, _ := os.Getwd()
+
+// 	fileid := r.URL.Query().Get("file_id")
+
+// 	file, found, err := app.db.GetFile(fileid)
+// 	if err != nil {
+// 		http.Error(w, err.Error(), http.StatusInternalServerError)
+// 		return
+// 	}
+
+// 	if !found {
+// 		http.Error(w, "File Not Found", http.StatusNotFound)
+// 		return
+// 	}
+
+// 	userId, err := ParseUserID(r)
+// 	if err != nil {
+// 		http.Error(w, err.Error(), http.StatusInternalServerError)
+// 		return
+// 	}
+
+// 	var data map[string]interface{}
+
+// 	if file.UserID != userId {
+// 		data = map[string]interface{}{
+// 			"success": false,
+// 			"message": "File doesn't belong to you.",
+// 		}
+
+// 		err = response.JSONWithHeaders(w, 400, data, nil)
+// 		if err != nil {
+// 			http.Error(w, err.Error(), http.StatusInternalServerError)
+// 			return
+// 		}
+
+// 	}
+
+// 	err = app.db.DeleteFile(fileid)
+// 	if err != nil {
+// 		http.Error(w, err.Error(), http.StatusInternalServerError)
+// 	}
+
+// 	err = os.RemoveAll(filepath.Join(workDir, "uploads", fileid))
+// 	if err != nil {
+// 		http.Error(w, err.Error(), http.StatusInternalServerError)
+// 		return
+// 	}
+
+// 	data = map[string]interface{}{
+// 		"success": true,
+// 		"message": "File deleted successfully.",
+// 	}
+
+// 	err = response.JSONWithHeaders(w, 200, data, nil)
+// 	if err != nil {
+// 		http.Error(w, err.Error(), http.StatusInternalServerError)
+// 		return
+// 	}
+// }

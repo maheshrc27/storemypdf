@@ -6,7 +6,7 @@ import (
     "github.com/maheshrc27/storemypdf/internal/database"
 )
 
-templ ListFiles(title string, isLoggedIn bool, files []database.File) {
+templ ListFiles(title string, files []database.File) {
     @components.DashboardLayout(title) {
         @ListsTableHtml(files)
     }

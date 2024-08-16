@@ -2,17 +2,12 @@ package main
 
 import (
 	"fmt"
-	"io"
-	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
-	"time"
 
-	"github.com/gabriel-vasile/mimetype"
-	"github.com/google/uuid"
+	"github.com/go-chi/chi/v5"
 	"github.com/maheshrc27/storemypdf/internal/database"
-	"github.com/maheshrc27/storemypdf/internal/funcs"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
@@ -30,14 +25,14 @@ func (app *application) UploadFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	isPremium, err := funcs.CheckPremium(userId, app.db)
+	_, premium, err := CheckPremium(userId, app.db)
 	if err != nil {
 		handleError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	maxFileSize := standardFileSizeLimit
-	if isPremium {
+	if premium {
 		maxFileSize = premiumFileSizeLimit
 	}
 
@@ -136,51 +131,23 @@ func (app *application) DeleteFile(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("File successfully deleted"))
 }
 
-func getUserID(uid string, db *database.DB) (uuid.UUID, error) {
-	if uid != "" {
-		return uuid.Parse(uid)
-	}
-	return funcs.GuestId(db)
-}
+func (app *application) DownloadFile(w http.ResponseWriter, r *http.Request) {
+	fileid := chi.URLParam(r, "fileid")
+	workDir, _ := os.Getwd()
 
-func handleDeletionTime(deleteAfter string, fileID string, db *database.DB) error {
-	hrs, err := time.ParseDuration(deleteAfter + "h")
+	fileInfo, found, err := app.db.GetFile(fileid)
 	if err != nil {
-		return fmt.Errorf("invalid delete_after duration: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
-	deleteTime := time.Now().Add(hrs)
-
-	_, err = db.InsertToDelete(fileID, deleteTime)
-	if err != nil {
-		return err
+	if !found {
+		http.Error(w, "Page Not Found", http.StatusNotFound)
+		return
 	}
 
-	return nil
-}
+	filepath := filepath.Join(workDir, "uploads", fileid+".pdf")
 
-func saveFile(uploadDir, fileID, filename string, file multipart.File) error {
-	ext := filepath.Ext(filename)
-	dst, err := os.Create(filepath.Join(uploadDir, fileID+ext))
-	if err != nil {
-		return err
-	}
-	defer dst.Close()
-	_, err = io.Copy(dst, file)
-	return err
-}
-
-func detectFileType(filePath string) (string, error) {
-	mtype, err := mimetype.DetectFile(filePath)
-	if err != nil {
-		return "", err
-	}
-	return mtype.String(), nil
-}
-
-func getWorkingDir() string {
-	dir, err := os.Getwd()
-	if err != nil {
-		panic(fmt.Sprintf("Failed to get working directory: %v", err))
-	}
-	return dir
+	w.Header().Set("Content-Disposition", "attachment; filename="+fileInfo.FileName)
+	w.Header().Set("Content-Type", fileInfo.FileType)
+	http.ServeFile(w, r, filepath)
 }

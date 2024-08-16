@@ -1,9 +1,8 @@
 package pages
 
 import "github.com/maheshrc27/storemypdf/templates/components"
-import "time"
 
-templ Subscription(title string, premium bool, status string, nextBillDate time.Time) {
+templ Subscription(title string, premium bool, status string, nextBillDate string) {
     @components.DashboardLayout(title) {
         if premium {
             @SubscribedHtml(status, nextBillDate)
@@ -13,14 +12,14 @@ templ Subscription(title string, premium bool, status string, nextBillDate time.
     }
 }
 
-templ SubscribedHtml(status string, nextBillDate time.Time) {
+templ SubscribedHtml(status string, nextBillDate string) {
     <h2 class="text-3xl font-semibold mb-4">Subscription Management</h2>
     <section class="w-full grid grid-cols-1 gap-6 md:grid-cols-3">
         <div class="p-8 rounded-lg shadow-md">
             <div class="mb-6 text-gray-700">
-                <p class="mb-1"><span class="font-medium">Status : </span>{ status }</p>
+                <p class="mb-1"><span class="font-medium">Status : </span> <span class="capitalize">{ status }</span></p>
                 <p class="mb-1"><span class="font-medium">Plan : </span>Premium</p>
-                <p><span class="font-medium">Next Billing Date: </span>{ nextBillDate.Format("Augist 10, 2020") }</p>
+                <p><span class="font-medium">Next Billing Date: </span>{ nextBillDate }</p>
             </div>
             <div class="flex gap-4">
                 <button id="cancel-subscription" class="font-medium bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">Cancel Subscription</button>

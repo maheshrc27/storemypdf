@@ -1,0 +1,162 @@
+package pages
+
+import "github.com/maheshrc27/storemypdf/templates/components"
+
+templ Docs(title string, isLoggedIn bool) {
+    @components.Layout(title, isLoggedIn) {
+        <div class="max-w-screen-lg mx-auto py-12 px-6">
+            <article class="prose prose-lg prose-stone mx-auto">
+            @templ.Raw(`
+                <h1 id="api-documentation">API Documentation</h1>
+                <h2 id="overview">Overview</h2>
+                <p>The <code>storemypdf</code> API provides endpoints for uploading, retrieving, and downloading files. This document describes how to use the API.</p>
+                <p><strong>Base URL:</strong><br>
+                <code>https://storemypdf.com/api</code></p>
+                <h2 id="authentication">Authentication</h2>
+                <p>API requests must include an API key for authentication. You can provide the API key as a query parameter.</p>
+                <ul>
+                <li><strong>Query Parameter Authentication:</strong>
+                <ul>
+                <li>Append <code>?key=YOUR_API_KEY</code> to the endpoint URL.</li>
+                </ul>
+                </li>
+                </ul>
+                <p>Replace <code>YOUR_API_KEY</code> with your actual API key.</p>
+                <h2 id="endpoints">Endpoints</h2>
+                <h3 id="upload-file">1. Upload File</h3>
+                <ul>
+                <li><strong>Endpoint:</strong> <code>/files/upload</code></li>
+                <li><strong>Method:</strong> <code>POST</code></li>
+                <li><strong>Description:</strong> Uploads a new file to the server.</li>
+                <li><strong>Headers:</strong>
+                <ul>
+                <li><code>Content-Type: multipart/form-data</code></li>
+                </ul>
+                </li>
+                <li><strong>Parameters:</strong>
+                <ul>
+                <li><strong>Body (Form Data):</strong>
+                <ul>
+                <li><code>file</code> (file, required): The file to upload.</li>
+                <li><code>delete_after</code> (integer, optional): Time in hours after which the file will be automatically deleted. Valid values are 0, 1, 2, 3, 4. Default is 0 (do not delete).</li>
+                <li><code>description</code> (string, optional): A description for the file.</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                <li><strong>Response:</strong>
+                <ul>
+                <li><strong>Success (<code>200 OK</code>):</strong><pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+                <span class="token string">"success"</span><span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+                <span class="token string">"file_id"</span><span class="token punctuation">:</span> <span class="token string">"unique-file-id"</span><span class="token punctuation">,</span>
+                <span class="token string">"message"</span><span class="token punctuation">:</span> <span class="token string">"File uploaded successfully."</span>
+                <span class="token punctuation">}</span>
+                </code></pre>
+                </li>
+                <li><strong>Error (<code>400 Bad Request</code>):</strong><pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+                <span class="token string">"success"</span><span class="token punctuation">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+                <span class="token string">"message"</span><span class="token punctuation">:</span> <span class="token string">"Invalid file format or missing file."</span>
+                <span class="token punctuation">}</span>
+                </code></pre>
+                </li>
+                </ul>
+                </li>
+                </ul>
+                <h3 id="get-file">2. Get File</h3>
+                <ul>
+                <li><strong>Endpoint:</strong> <code>/files/{file_id}</code></li>
+                <li><strong>Method:</strong> <code>GET</code></li>
+                <li><strong>Description:</strong> Retrieves information about a file by its unique ID.</li>
+                <li><strong>Headers:</strong>
+                <ul>
+                <li><code>Accept: application/json</code></li>
+                </ul>
+                </li>
+                <li><strong>Parameters:</strong>
+                <ul>
+                <li><strong>Path:</strong>
+                <ul>
+                <li><code>file_id</code> (string, required): The unique identifier of the file.</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                <li><strong>Response:</strong>
+                <ul>
+                <li><strong>Success (<code>200 OK</code>):</strong><pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+                <span class="token string">"success"</span><span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+                <span class="token string">"file"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+                    <span class="token string">"id"</span><span class="token punctuation">:</span> <span class="token string">"unique-file-id"</span><span class="token punctuation">,</span>
+                    <span class="token string">"name"</span><span class="token punctuation">:</span> <span class="token string">"filename.pdf"</span><span class="token punctuation">,</span>
+                    <span class="token string">"url"</span><span class="token punctuation">:</span> <span class="token string">"https://storemypdf/api/files/unique-file-id/download"</span><span class="token punctuation">,</span>
+                    <span class="token string">"description"</span><span class="token punctuation">:</span> <span class="token string">"Optional description of the file"</span><span class="token punctuation">,</span>
+                    <span class="token string">"delete_after"</span><span class="token punctuation">:</span> <span class="token number">0</span>
+                <span class="token punctuation">}</span>
+                <span class="token punctuation">}</span>
+                </code></pre>
+                </li>
+                <li><strong>Error (<code>404 Not Found</code>):</strong><pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+                <span class="token string">"success"</span><span class="token punctuation">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+                <span class="token string">"message"</span><span class="token punctuation">:</span> <span class="token string">"File not found."</span>
+                <span class="token punctuation">}</span>
+                </code></pre>
+                </li>
+                </ul>
+                </li>
+                </ul>
+                <h3 id="download-file">3. Download File</h3>
+                <ul>
+                <li><strong>Endpoint:</strong> <code>/files/{file_id}/download</code></li>
+                <li><strong>Method:</strong> <code>GET</code></li>
+                <li><strong>Description:</strong> Downloads a file by its unique ID.</li>
+                <li><strong>Headers:</strong>
+                <ul>
+                <li><code>Accept: application/octet-stream</code></li>
+                </ul>
+                </li>
+                <li><strong>Parameters:</strong>
+                <ul>
+                <li><strong>Path:</strong>
+                <ul>
+                <li><code>file_id</code> (string, required): The unique identifier of the file.</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                <li><strong>Response:</strong>
+                <ul>
+                <li><strong>Success (<code>200 OK</code>):</strong> The file content is returned in the response body.</li>
+                <li><strong>Error (<code>404 Not Found</code>):</strong><pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+                <span class="token string">"success"</span><span class="token punctuation">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+                <span class="token string">"message"</span><span class="token punctuation">:</span> <span class="token string">"File not found."</span>
+                <span class="token punctuation">}</span>
+                </code></pre>
+                </li>
+                </ul>
+                </li>
+                </ul>
+                <h2 id="error-codes">Error Codes</h2>
+                <ul>
+                <li><strong>400 Bad Request:</strong> The request was invalid. This could be due to missing parameters or invalid values.</li>
+                <li><strong>404 Not Found:</strong> The requested resource could not be found. This may occur if the file ID does not exist.</li>
+                <li><strong>500 Internal Server Error:</strong> An unexpected error occurred on the server.</li>
+                </ul>
+                <h2 id="rate-limiting">Rate Limiting</h2>
+                <ul>
+                <li><strong>Maximum Requests:</strong> 1000 requests per hour per IP address.</li>
+                <li><strong>Rate Limit Exceeded:</strong> <code>429 Too Many Requests</code></li>
+                </ul>
+                <h2 id="examples">Examples</h2>
+                <h3 id="upload-file-1">Upload File</h3>
+                <p><strong>Request:</strong></p>
+                <pre class=" language-bash"><code class="prism  language-bash">curl -X POST <span class="token string">"https://storemypdf/api/files/upload"</span> \
+                -H <span class="token string">"Content-Type: multipart/form-data"</span> \
+                -F <span class="token string">"file=@/path/to/file.pdf"</span> \
+                -F <span class="token string">"delete_after=1"</span> \
+                -F <span class="token string">"description=Sample PDF file"</span>
+                </code></pre>
+            `)
+            </article>
+        </div>
+    }
+}
