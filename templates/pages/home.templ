@@ -102,49 +102,7 @@ templ Home(title string, isLoggedIn bool) {
         </div>
         </section>
         <!-- FAQ Section -->
-        <section class="py-12 px-6 bg-gray-50">
-        <div class="max-w-screen-sm mx-auto">
-            <h2 class="text-3xl font-bold text-gray-800 text-center">Frequently Asked Questions</h2>
-            <div class="mt-8 space-y-4">
-                <!-- Question 1 -->
-                <details class="border rounded-lg overflow-hidden">
-                    <summary class="px-4 py-3 bg-gray-200 text-gray-800 font-semibold cursor-pointer">
-                        What types of files can I upload?
-                    </summary>
-                    <div class="px-4 py-2 bg-white text-gray-600">
-                        <p>You can upload PDFs, Word documents, images, and various other file types. If you have a specific file format, please check our supported formats list.</p>
-                    </div>
-                </details>
-                <!-- Question 2 -->
-                <details class="border rounded-lg overflow-hidden">
-                    <summary class="px-4 py-3 bg-gray-200 text-gray-800 font-semibold cursor-pointer">
-                        How do I manage my files?
-                    </summary>
-                    <div class="px-4 py-2 bg-white text-gray-600">
-                        <p>You can organize your files into folders, rename them, and delete or move files as needed using our user-friendly interface.</p>
-                    </div>
-                </details>
-                <!-- Question 3 -->
-                <details class="border rounded-lg overflow-hidden">
-                    <summary class="px-4 py-3 bg-gray-200 text-gray-800 font-semibold cursor-pointer">
-                        Is there a file size limit?
-                    </summary>
-                    <div class="px-4 py-2 bg-white text-gray-600">
-                        <p>Our free plan allows for file uploads up to 25MB, while the Pro plan supports up to 64MB per file. For larger files, consider upgrading to Pro.</p>
-                    </div>
-                </details>
-                <!-- Question 4 -->
-                <details class="border rounded-lg overflow-hidden">
-                    <summary class="px-4 py-3 bg-gray-200 text-gray-800 font-semibold cursor-pointer">
-                        How can I upgrade to Pro?
-                    </summary>
-                    <div class="px-4 py-2 bg-white text-gray-600">
-                        <p>You can upgrade to the Pro plan by visiting our pricing page and selecting the “Get Started” button under the Pro Plan. Follow the prompts to complete the upgrade.</p>
-                    </div>
-                </details>
-            </div>
-        </div>
-        </section>
+        @FAQ()
         <script>
             // Get elements
         const startUploadingButton = document.getElementById('start-uploading-button');
@@ -160,4 +118,155 @@ templ Home(title string, isLoggedIn bool) {
         });
         </script>
     }
+}
+
+templ FAQ() {
+    <section class="py-12 px-6 bg-gray-50">
+        <div class="max-w-screen-sm mx-auto">
+            <h2 class="text-3xl font-bold text-gray-800 text-center">Frequently Asked Questions</h2>
+            <div class="mt-8 space-y-4">
+                <details class="border rounded-lg overflow-hidden">
+                    <summary class="px-4 py-3 bg-gray-200 text-gray-800 font-semibold cursor-pointer">
+                        What types of files can I upload?
+                    </summary>
+                    <div class="px-4 py-2 bg-white text-gray-600">
+                        <p>For now, we only support PDF files. However, we plan to support various other file types in the future.</p>
+                    </div>
+                </details>
+                <details class="border rounded-lg overflow-hidden">
+                    <summary class="px-4 py-3 bg-gray-200 text-gray-800 font-semibold cursor-pointer">
+                        What is the maximum file size I can upload?
+                    </summary>
+                    <div class="px-4 py-2 bg-white text-gray-600">
+                        <p>
+                            <strong>Free Users:</strong> You can upload PDF files up to 15 MB in size.<br>
+                            <strong>Paid Users:</strong> You can upload PDF files up to 64 MB in size.
+                        </p>
+                    </div>
+                </details>
+
+                <details class="border rounded-lg overflow-hidden">
+                    <summary class="px-4 py-3 bg-gray-200 text-gray-800 font-semibold cursor-pointer">
+                        How long will my files be stored if I don't have an account?
+                    </summary>
+                    <div class="px-4 py-2 bg-white text-gray-600">
+                        <p>
+                            For free users without an account, files will be stored for up to 15 days before being automatically deleted.
+                        </p>
+                    </div>
+                </details>
+
+                <details class="border rounded-lg overflow-hidden">
+                    <summary class="px-4 py-3 bg-gray-200 text-gray-800 font-semibold cursor-pointer">
+                        How can I create an account?
+                    </summary>
+                    <div class="px-4 py-2 bg-white text-gray-600">
+                        <p>
+                            To create an account, simply visit our <a href="/signup" class="text-blue-500 underline">sign-up page</a> and follow the instructions to register. Having an account allows you to manage your files more effectively and extend the storage duration.
+                        </p>
+                    </div>
+                </details>
+
+                <details class="border rounded-lg overflow-hidden">
+                    <summary class="px-4 py-3 bg-gray-200 text-gray-800 font-semibold cursor-pointer">
+                        What happens to my files if I upgrade to a paid account?
+                    </summary>
+                    <div class="px-4 py-2 bg-white text-gray-600">
+                        <p>
+                            If you upgrade to a paid account, you’ll benefit from increased upload limits (up to 64 MB per file) and additional features. Files uploaded by paid users will not be subject to the 15-day deletion policy applicable to free users without accounts.
+                        </p>
+                    </div>
+                </details>
+
+                <details class="border rounded-lg overflow-hidden">
+                    <summary class="px-4 py-3 bg-gray-200 text-gray-800 font-semibold cursor-pointer">
+                        Can I get a refund if I decide I don't want the paid plan?
+                    </summary>
+                    <div class="px-4 py-2 bg-white text-gray-600">
+                        <p>
+                            All payments for the paid plan are non-refundable. However, if there is an error or mistake on our part, please contact our support team, and we will address the issue.
+                        </p>
+                    </div>
+                </details>
+
+                <details class="border rounded-lg overflow-hidden">
+                    <summary class="px-4 py-3 bg-gray-200 text-gray-800 font-semibold cursor-pointer">
+                        Are my files private or public?
+                    </summary>
+                    <div class="px-4 py-2 bg-white text-gray-600">
+                        <p>
+                            All files uploaded to our platform are public and can be accessed by anyone who has the link to the file. Please ensure that you do not upload sensitive or confidential information.
+                        </p>
+                    </div>
+                </details>
+
+                <details class="border rounded-lg overflow-hidden">
+                    <summary class="px-4 py-3 bg-gray-200 text-gray-800 font-semibold cursor-pointer">
+                        How can I share my PDF files?
+                    </summary>
+                    <div class="px-4 py-2 bg-white text-gray-600">
+                        <p>
+                            Once uploaded, you will receive a link to your PDF file which you can share with others. Simply copy the link provided and distribute it as needed.
+                        </p>
+                    </div>
+                </details>
+
+                <details class="border rounded-lg overflow-hidden">
+                    <summary class="px-4 py-3 bg-gray-200 text-gray-800 font-semibold cursor-pointer">
+                        What should I do if I encounter an issue with uploading or accessing my files?
+                    </summary>
+                    <div class="px-4 py-2 bg-white text-gray-600">
+                        <p>
+                            If you experience any issues, please contact our support team at <a href="mailto:support@storemypdf.com" class="text-blue-500 underline">support@storemypdf.com</a> with details of the problem. We’re here to help!
+                        </p>
+                    </div>
+                </details>
+
+                <details class="border rounded-lg overflow-hidden">
+                    <summary class="px-4 py-3 bg-gray-200 text-gray-800 font-semibold cursor-pointer">
+                        How secure is my data on your platform?
+                    </summary>
+                    <div class="px-4 py-2 bg-white text-gray-600">
+                        <p>
+                            While we strive to ensure the security of our platform, please be aware that all files are publicly accessible. If you need to keep your files private, consider using a service that offers private or encrypted storage options.
+                        </p>
+                    </div>
+                </details>
+
+                <details class="border rounded-lg overflow-hidden">
+                    <summary class="px-4 py-3 bg-gray-200 text-gray-800 font-semibold cursor-pointer">
+                        Can I delete my files manually before the 15-day period?
+                    </summary>
+                    <div class="px-4 py-2 bg-white text-gray-600">
+                        <p>
+                            Yes, you can manually delete your files at any time through your account dashboard or by following the provided file management options.
+                        </p>
+                    </div>
+                </details>
+
+                <details class="border rounded-lg overflow-hidden">
+                    <summary class="px-4 py-3 bg-gray-200 text-gray-800 font-semibold cursor-pointer">
+                        What happens to my files if I cancel my paid subscription?
+                    </summary>
+                    <div class="px-4 py-2 bg-white text-gray-600">
+                        <p>
+                            If you cancel your paid subscription, your files will remain accessible according to the terms for free users.
+                        </p>
+                    </div>
+                </details>
+
+                <details class="border rounded-lg overflow-hidden">
+                    <summary class="px-4 py-3 bg-gray-200 text-gray-800 font-semibold cursor-pointer">
+                        How do I contact customer support?
+                    </summary>
+                    <div class="px-4 py-2 bg-white text-gray-600">
+                        <p>
+                            For any questions or issues, please contact our customer support team at <a href="mailto:support@storemypdf.com" class="text-blue-500 underline">support@storemypdf.com</a>. We aim to respond to all inquiries as quickly as possible.
+                        </p>
+                    </div>
+                </details>
+
+            </div>
+        </div>
+    </section>
 }

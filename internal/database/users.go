@@ -72,7 +72,7 @@ func (db *DB) GetUserByEmail(email string) (*User, bool, error) {
 		return nil, false, err
 	}
 
-	return &user, true, err
+	return &user, true, nil
 }
 
 func (db *DB) UpdateUserHashedPassword(id uuid.UUID, hashedPassword string) error {

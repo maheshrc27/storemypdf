@@ -8,7 +8,7 @@ templ Account(title string) {
         <section class="w-full grid grid-cols-1 gap-6 md:grid-cols-3">
             <div class="rounded-lg shadow-md p-8">
                 <h2 class="text-2xl font-bold mb-6 text-gray-700">Change Password</h2>
-                <form action="/u/account/change-password" method="POST" class="space-y-4">
+                <form hx-post="/u/account/change-password" hx-trigger="submit" hx-target="#change-response" hx-swap="innerHTML" class="space-y-4">
                     <div>
                         <label for="current-password" class="block text-sm font-medium text-gray-600">Current Password</label>
                         <input type="password" id="current-password" name="old_password" required
@@ -31,6 +31,7 @@ templ Account(title string) {
                         class="w-full py-2 px-4 bg-sky-600 text-white font-semibold rounded-md shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500">
                         Change Password
                     </button>
+                    <div id="change-response" class="mt-3"></div>
                 </form>
             </div>
             <div class="p-8 bg-white shadow-md rounded-lg">
@@ -38,7 +39,7 @@ templ Account(title string) {
                 <p class="text-sm text-gray-600 mb-4">
                     Are you sure you want to delete your account? This action cannot be undone. Please confirm your password to proceed.
                 </p>
-                <form action="/u/account/delete" method="POST" class="space-y-4">
+                <form hx-post="/u/account/delete" hx-trigger="submit" hx-target="#delete-response" hx-swap="innerHTML" class="space-y-4">
                     <div>
                         <label for="password" class="block text-sm font-medium text-gray-600">Confirm Password</label>
                         <input type="password" id="password" name="password" required
@@ -49,6 +50,7 @@ templ Account(title string) {
                         class="w-full py-2 px-4 bg-red-600 text-white font-semibold rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
                         Delete Account
                     </button>
+                    <div id="delete-response" class="mt-3"></div>
                 </form>
             </div>
         </section>

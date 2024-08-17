@@ -1,13 +1,14 @@
 package components
 
 templ HtmlWrapper(title string) {
+    <!DOCTYPE html>
     <html lang='en'>
         <head>
             <meta charset='utf-8'>
             <title>storemypdf - {title}</title>
             <meta name="viewport" content="width=device-width, initial-scale=1">
             <link rel='stylesheet' href='/static/css/tailwind.css'>
-            <script src="https://unpkg.com/htmx.org@2.0.1"></script>
+            <script src="https://unpkg.com/htmx.org@2.0.2" integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ" crossorigin="anonymous"></script>
         </head>
         <body>
             { children... }
