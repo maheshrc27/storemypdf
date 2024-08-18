@@ -4,8 +4,8 @@ import "github.com/maheshrc27/storemypdf/templates/components"
 
 templ Dashboard(title string) {
     @components.DashboardLayout(title) {
-        <section class="w-full">
-            <div class="rounded shadow-md p-5">
+        <section class="max-w-screen-xl mx-auto w-full">
+            <div class="bg-white border border-1 rounded p-8">
                 <form method="POST" action="/upload" enctype="multipart/form-data">
                     <div class="max-w-screen-sm mx-auto flex flex-col gap-8">
                         <div class="font-[sans-serif] max-w-md mx-auto">

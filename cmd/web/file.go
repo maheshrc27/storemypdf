@@ -127,8 +127,7 @@ func (app *application) DeleteFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("File successfully deleted"))
+	w.Header().Set("HX-Refresh", "true")
 }
 
 func (app *application) DownloadFile(w http.ResponseWriter, r *http.Request) {

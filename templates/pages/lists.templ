@@ -13,9 +13,9 @@ templ ListFiles(title string, files []database.File) {
 }
 
 templ ListsTableHtml(files []database.File) {
-    <section class="w-full">
+    <section class="max-w-screen-xl mx-auto bg-white p-8 rounded border-1">
         <h3 class="text-3xl font-semibold mb-4">My Files</h3>
-        <div class="max-w-screen-lg overflow-x-auto">
+        <div class="overflow-x-auto">
             <table class="min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
                 <thead>
                     <tr>
@@ -35,9 +35,14 @@ templ ListsTableHtml(files []database.File) {
                                 <td class="whitespace-nowrap px-4 py-2 text-gray-700">{file.Description}</td>
                                 <td class="whitespace-nowrap px-4 py-2 text-gray-700">{file.Created.Format("January 2, 2006")}</td>
                                 <td class="whitespace-nowrap px-4 py-2">
-                                    <a href={templ.URL(fmt.Sprintf("/f/%s", file.ID)) } class="inline-block rounded bg-sky-600 px-4 py-2 text-xs font-medium text-white hover:bg-sky-700">
-                                        View
-                                    </a>
+                                    <div class="flex gap-2">
+                                        <a href={templ.URL(fmt.Sprintf("/f/%s", file.ID)) } class="rounded bg-sky-600 px-4 py-2 text-xs font-medium text-white hover:bg-sky-700">
+                                            View
+                                        </a>
+                                        <button type="button"
+                                        hx-post={ string(templ.URL(fmt.Sprintf("/u/files/delete?id=%s", file.ID)))}
+                                        class="px-4 py-2 text-xs font-medium text-white bg-red-600 hover:bg-red-500 rounded">Delete</button>
+                                    </div>
                                 </td>
                             </tr>
                         }

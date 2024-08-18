@@ -41,6 +41,7 @@ func (app *application) routes() http.Handler {
 		r.Get("/u/subscription", app.Subscription)
 		r.Get("/u/subscription/subscribe", app.Purchase)
 		r.Get("/u/api-keys", app.ApiKeys)
+		r.Post("/u/files/delete", app.DeleteFile)
 		r.Post("/u/account/change-password", app.ChangePassword)
 		r.Post("/u/account/delete", app.DeleteAccount)
 		r.Post("/u/generate-api-key", app.GenerateApiKey)

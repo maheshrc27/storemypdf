@@ -22,7 +22,7 @@ templ Header(isLoggedIn bool) {
       
       <!-- Sign In Button -->
       if isLoggedIn {
-        <a href="/u/dashboard" class="font-medium text-sm bg-sky-600 hover:bg-sky-500 text-white px-3 py-2 rounded-lg">Dashboard</a>
+        <a href="/u/dashboard" class="font-medium text-sm bg-sky-600 hover:bg-sky-500 text-white px-3 py-2 rounded-lg hidden lg:block">Dashboard</a>
       } else {
       <a href="/signin" class="font-semibold px-3 py-2 rounded text-white bg-sky-600 hover:bg-sky-500 hidden lg:block border-sm">Sign In</a>
       }
