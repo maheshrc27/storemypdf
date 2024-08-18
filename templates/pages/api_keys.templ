@@ -1,14 +1,18 @@
 package pages
 
 import (
-    // "fmt"
+    "fmt"
     "github.com/maheshrc27/storemypdf/templates/components"
     "github.com/maheshrc27/storemypdf/internal/database"
 )
 
-templ ListKeys(title string, keys []database.Key) {
+templ ListKeys(title string, premium bool ,keys []database.Key) {
     @components.DashboardLayout(title) {
-        @KeysHtml(keys)
+        if premium {
+            @KeysHtml(keys)
+        } else {
+            @paywall()
+        }
     }
 }
 
@@ -23,12 +27,21 @@ templ KeysHtml(keys []database.Key) {
                         <span class="w-full border rounded px-3 py-2 bg-stone-200 text-gray-700 overflow-auto">
                             { key.ApiKeyHash }
                         </span>
-                        <button type="button" class="px-3 py-2 bg-red-500 rounded text-white">Delete</button>
+                        <button type="button"
+                        hx-post={ string(templ.URL(fmt.Sprintf("/u/api-keys/delete?kid=%d", key.ID)))}
+                        hx-swap="none"
+                        class="px-3 py-2 bg-red-600 rounded text-white font-medium hover:bg-red-500">Delete</button>
                     </div>
                 }
             } else {
-                <button type="button" hx-post="/u/generate-api-key">Generate API Key</button>
+                <button type="button"
+                hx-post="/u/generate-api-key"
+                class="px-3 py-2 text-white font-medium rounded bg-sky-600 hover:bg-sky-500">Generate API Key</button>
             }
         </div>
     </section>
+}
+
+templ paywall() {
+    <a href="/u/subscription" class="underline text-sky-600 hover:text-sky-500">Upgrade to Pro plan to get API Key access</a>
 }

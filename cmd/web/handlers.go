@@ -108,31 +108,44 @@ func (app *application) ApiKeys(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	_, premium, err := CheckPremium(userId, app.db)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	keys, _, err := app.db.GetKeysByUserID(userId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	page := pages.ListKeys("API Keys", keys)
+	page := pages.ListKeys("API Keys", premium, keys)
 	page.Render(context.Background(), w)
 }
 
 func (app *application) Subscription(w http.ResponseWriter, r *http.Request) {
-	userId, err := ParseUserID(r)
+	userID, err := ParseUserID(r)
 	if err != nil {
 		handleError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	subscription, premium, err := CheckPremium(userId, app.db)
+	subscription, premium, err := CheckPremium(userID, app.db)
 	if err != nil {
 		handleError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	status := subscription.Status
-	nextbilldate := subscription.NextBillDate.Format("January 2, 2006")
+	var (
+		status       string = ""
+		nextbilldate string = ""
+	)
+
+	if subscription != nil {
+		status = subscription.Status
+		nextbilldate = subscription.NextBillDate.Format("January 2, 2006")
+	}
 
 	page := pages.Subscription("Subscription Management", premium, status, nextbilldate)
 	page.Render(context.Background(), w)

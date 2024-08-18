@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/gabriel-vasile/mimetype"
@@ -13,7 +14,6 @@ import (
 	"github.com/maheshrc27/storemypdf/internal/database"
 	"github.com/maheshrc27/storemypdf/internal/response"
 	gonanoid "github.com/matoous/go-nanoid/v2"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func (app *application) UploadFileApi(w http.ResponseWriter, r *http.Request) {
@@ -121,19 +121,32 @@ func (app *application) GenerateApiKey(w http.ResponseWriter, r *http.Request) {
 
 	key := uuid.New().String()
 
-	keyhash, err := bcrypt.GenerateFromPassword([]byte(key), bcrypt.DefaultCost)
+	_, err = app.db.InsertKey(string(key), userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	id, err := app.db.InsertKey(string(keyhash), userID)
+	w.Header().Set("HX-Refresh", "true")
+}
+
+func (app *application) DeleteApiKey(w http.ResponseWriter, r *http.Request) {
+
+	kid := r.URL.Query().Get("kid")
+
+	keyid, err := strconv.Atoi(kid)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	fmt.Println(id)
+	err = app.db.DeleteKey(int8(keyid))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("HX-Refresh", "true")
 }
 
 // func (app *application) FileInfoApi(w http.ResponseWriter, r *http.Request) {

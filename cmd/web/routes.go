@@ -44,6 +44,7 @@ func (app *application) routes() http.Handler {
 		r.Post("/u/account/change-password", app.ChangePassword)
 		r.Post("/u/account/delete", app.DeleteAccount)
 		r.Post("/u/generate-api-key", app.GenerateApiKey)
+		r.Post("/u/api-keys/delete", app.DeleteApiKey)
 
 		r.Get("/signup", app.SignUp)
 		r.Post("/signup", app.SignUp)
