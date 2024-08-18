@@ -33,6 +33,7 @@ func (app *application) routes() http.Handler {
 		r.Get("/f/{fileid}", app.FileInfo)
 		r.Get("/f/{fileid}/open", app.ReadFile)
 		r.Post("/f/{fileid}/download", app.DownloadFile)
+		r.Get("/verify-email", app.VerifyEmail)
 
 		r.Get("/u/files", app.ListFiles)
 		r.Get("/u/dashboard", app.UserDashboard)

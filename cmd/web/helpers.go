@@ -12,6 +12,8 @@ import (
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/google/uuid"
 	"github.com/maheshrc27/storemypdf/internal/database"
+	"github.com/maheshrc27/storemypdf/internal/response"
+	"github.com/maheshrc27/storemypdf/internal/tokens"
 	"github.com/maheshrc27/storemypdf/internal/version"
 )
 
@@ -157,5 +159,25 @@ func isActiveSubscription(subscription *database.Subscription) bool {
 		return subscription.NextBillDate.After(now)
 	default:
 		return false
+	}
+}
+
+func (app *application) SendVerificationEmail(w http.ResponseWriter, email string, userid uuid.UUID) {
+
+	tokenString, err := tokens.GenerateJWT(userid.String(), app.config.cookie.secretKey)
+	if err != nil {
+		response.HTML(w, "Internal Server Error")
+		return
+	}
+
+	data := map[string]any{
+		"Name": "storemypdf",
+		"link": "http://localhost:4444/verify-email?vid=" + tokenString,
+	}
+
+	err = app.mailer.Send(email, data, "verification.tmpl")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }

@@ -85,6 +85,16 @@ func (db *DB) UpdateUserHashedPassword(id uuid.UUID, hashedPassword string) erro
 	return err
 }
 
+func (db *DB) UpdateVerification(id uuid.UUID, verified bool) error {
+	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
+	defer cancel()
+
+	query := `UPDATE users SET verified = $1, updated = $2 WHERE id = $3`
+
+	_, err := db.ExecContext(ctx, query, verified, time.Now(), id)
+	return err
+}
+
 func (db *DB) DeleteUser(id uuid.UUID) error {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()

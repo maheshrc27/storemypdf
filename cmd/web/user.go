@@ -63,11 +63,13 @@ func (app *application) SignUp(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		_, err = app.db.InsertUser(form.Email, string(hashedPassword))
+		userID, err := app.db.InsertUser(form.Email, string(hashedPassword))
 		if err != nil {
 			response.HTML(w, "Couldn't create user")
 			return
 		}
+
+		go app.SendVerificationEmail(w, form.Email, userID)
 
 		w.Header().Set("HX-Redirect", "/signin")
 	}
@@ -250,6 +252,52 @@ func (app *application) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.Logout(w, r)
+	cookie := http.Cookie{
+		Name:     "authentication",
+		Value:    "",
+		Path:     "/",
+		Expires:  time.Now(),
+		HttpOnly: true,
+		Secure:   true,
+	}
+	cookies.Write(w, cookie)
 
+	w.Header().Set("HX-Redirect", "/signin")
+
+}
+
+func (app *application) VerifyEmail(w http.ResponseWriter, r *http.Request) {
+	vid := r.URL.Query().Get("vid")
+
+	authorized, err := tokens.IsAuthorized(vid, app.config.cookie.secretKey)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if !authorized {
+		http.Error(w, "User not authorized", http.StatusUnauthorized)
+		return
+	}
+
+	uid, err := tokens.ExtractIDFromToken(vid, app.config.cookie.secretKey)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	userID, err := uuid.Parse(uid)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = app.db.UpdateVerification(userID, true)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	page := pages.VerificationSuccess("Email Verified Successfully")
+	page.Render(context.Background(), w)
 }
