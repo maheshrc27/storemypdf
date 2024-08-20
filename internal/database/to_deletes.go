@@ -33,3 +33,36 @@ func (db *DB) InsertToDelete(fileId string, deleteTime time.Time) (uuid.UUID, er
 
 	return id, err
 }
+
+func (db *DB) GetToDeletes() ([]ToDelete, bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
+	defer cancel()
+
+	var todeletes []ToDelete
+
+	query := `SELECT * FROM to_deletes WHERE delete_time < CURRENT_TIMESTAMP`
+
+	rows, err := db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, false, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var td ToDelete
+		if err := rows.Scan(&td.ID, &td.FileID, &td.DeleteTime, &td.Created, &td.Updated); err != nil {
+			return todeletes, false, err
+		}
+		todeletes = append(todeletes, td)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, false, err
+	}
+
+	if len(todeletes) == 0 {
+		return nil, false, nil
+	}
+
+	return todeletes, true, nil
+}

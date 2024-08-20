@@ -14,6 +14,7 @@ import (
 	"github.com/maheshrc27/storemypdf/internal/env"
 	"github.com/maheshrc27/storemypdf/internal/smtp"
 	"github.com/maheshrc27/storemypdf/internal/version"
+	"github.com/robfig/cron"
 
 	"github.com/lmittmann/tint"
 )
@@ -103,6 +104,10 @@ func run(logger *slog.Logger) error {
 		logger: logger,
 		mailer: mailer,
 	}
+
+	c := cron.New()
+	c.AddFunc("@every 00h00m30s", app.DeleteFileScheduler)
+	c.Start()
 
 	return app.serveHTTP()
 }
