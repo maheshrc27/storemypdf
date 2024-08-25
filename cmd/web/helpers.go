@@ -3,12 +3,17 @@ package main
 import (
 	"fmt"
 	"io"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/google/uuid"
 	"github.com/maheshrc27/storemypdf/internal/database"
@@ -180,4 +185,59 @@ func (app *application) SendVerificationEmail(w http.ResponseWriter, email strin
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func SaveFileToS3(fileID, filename string, file multipart.File) error {
+	ext := filepath.Ext(filename)
+
+	const (
+		AWS_S3_REGION = ""
+		AWS_S3_BUCKET = ""
+	)
+
+	session, err := session.NewSession(&aws.Config{Region: aws.String(AWS_S3_REGION)})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	uploader := s3manager.NewUploader(session)
+
+	_, err = uploader.Upload(&s3manager.UploadInput{
+		Bucket: aws.String(AWS_S3_BUCKET),
+		Key:    aws.String(fileID + ext),
+		Body:   file,
+	})
+
+	if err != nil {
+		fmt.Printf("failed to upload file, %v", err)
+		return nil
+	}
+
+	return nil
+}
+
+func DeleteS3Object(fileID string) error {
+	const (
+		AWS_S3_REGION = ""
+		AWS_S3_BUCKET = ""
+	)
+
+	session, err := session.NewSession(&aws.Config{Region: aws.String(AWS_S3_REGION)})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	svc := s3.New(session)
+
+	_, err = svc.DeleteObject(&s3.DeleteObjectInput{
+		Bucket: aws.String(AWS_S3_BUCKET),
+		Key:    aws.String(fileID + ".pdf"),
+	})
+
+	if err != nil {
+		fmt.Printf("failed to upload file, %v", err)
+		return nil
+	}
+
+	return nil
 }

@@ -4,6 +4,7 @@ go 1.21.0
 
 require (
 	github.com/a-h/templ v0.2.747
+	github.com/aws/aws-sdk-go v1.55.5
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gabriel-vasile/mimetype v1.4.5
 	github.com/go-chi/chi/v5 v5.1.0
@@ -16,6 +17,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/lmittmann/tint v1.0.5
 	github.com/matoous/go-nanoid/v2 v2.1.0
+	github.com/robfig/cron v1.2.0
 	github.com/tomasen/realip v0.0.0-20180522021738-f0c99a92ddce
 	github.com/wneessen/go-mail v0.4.2
 	golang.org/x/crypto v0.25.0
@@ -26,7 +28,7 @@ require (
 require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
-	github.com/robfig/cron v1.2.0 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	golang.org/x/net v0.27.0 // indirect
 )
