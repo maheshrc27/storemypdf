@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -67,7 +66,7 @@ func (app *application) UploadFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := saveFile(uploadDir, fileData.ID, header.Filename, file); err != nil {
+	if err := SaveFileToS3(fileData.ID, header.Filename, file); err != nil {
 		handleError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -93,11 +92,6 @@ func (app *application) UploadFile(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) DeleteFile(w http.ResponseWriter, r *http.Request) {
-	workDir, err := os.Getwd()
-	if err != nil {
-		http.Error(w, "Failed to determine working directory", http.StatusInternalServerError)
-		return
-	}
 
 	fileID := r.URL.Query().Get("id")
 	if fileID == "" {
@@ -120,10 +114,9 @@ func (app *application) DeleteFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	filePath := filepath.Join(workDir, "uploads", fileID)
-	if err := os.RemoveAll(filePath); err != nil {
-		fmt.Printf("Error removing file from filesystem: %v\n", err)
-		http.Error(w, "Error removing file from filesystem", http.StatusInternalServerError)
+	err = DeleteS3Object(fileID)
+	if err != nil {
+		http.Error(w, "Error deleting file record", http.StatusInternalServerError)
 		return
 	}
 

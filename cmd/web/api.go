@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -66,20 +65,13 @@ func (app *application) UploadFileApi(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ext := filepath.Ext(header.Filename)
-	dst, err := os.Create(filepath.Join(uploadDir, fmt.Sprintf("%s%s", fileData.ID, ext)))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+
+	if err := SaveFileToS3(fileData.ID, header.Filename, file); err != nil {
+		handleError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	defer dst.Close()
 
 	fileData.Size = int64(header.Size)
-	written, err := io.Copy(dst, file)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	fmt.Println(written)
 
 	// Detect the MIME type of the uploaded file
 	mtype, err := mimetype.DetectFile(filepath.Join(uploadDir, fmt.Sprintf("%s%s", fileData.ID, ext)))

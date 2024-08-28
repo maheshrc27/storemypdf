@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -190,12 +191,13 @@ func (app *application) SendVerificationEmail(w http.ResponseWriter, email strin
 func SaveFileToS3(fileID, filename string, file multipart.File) error {
 	ext := filepath.Ext(filename)
 
-	const (
-		AWS_S3_REGION = ""
-		AWS_S3_BUCKET = ""
-	)
+	const AWS_S3_BUCKET = "storemypdf"
 
-	session, err := session.NewSession(&aws.Config{Region: aws.String(AWS_S3_REGION)})
+	session, err := session.NewSession(&aws.Config{
+		Region:      aws.String(os.Getenv("AWS_S3_REGION")),
+		Credentials: credentials.NewStaticCredentials(os.Getenv("AWS_ACCESS_KEY_ID"), os.Getenv("AWS_SECRET_ACCESS_KEY"), os.Getenv("")),
+	})
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -217,15 +219,12 @@ func SaveFileToS3(fileID, filename string, file multipart.File) error {
 }
 
 func DeleteS3Object(fileID string) error {
-	const (
-		AWS_S3_REGION = ""
-		AWS_S3_BUCKET = ""
-	)
+	const AWS_S3_BUCKET = "storemypdf"
 
-	session, err := session.NewSession(&aws.Config{Region: aws.String(AWS_S3_REGION)})
-	if err != nil {
-		log.Fatal(err)
-	}
+	session, err := session.NewSession(&aws.Config{
+		Region:      aws.String(os.Getenv("AWS_S3_REGION")),
+		Credentials: credentials.NewStaticCredentials(os.Getenv("AWS_ACCESS_KEY_ID"), os.Getenv("AWS_SECRET_ACCESS_KEY"), os.Getenv("AWS_SESSION_TOKEN")),
+	})
 
 	svc := s3.New(session)
 
