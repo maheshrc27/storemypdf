@@ -149,7 +149,7 @@ func (app *application) Logout(w http.ResponseWriter, r *http.Request) {
 	}
 	cookies.Write(w, cookie)
 
-	http.Redirect(w, r, "/signin", http.StatusSeeOther)
+	w.Header().Set("HX-Refresh", "true")
 }
 
 func (app *application) ChangePassword(w http.ResponseWriter, r *http.Request) {

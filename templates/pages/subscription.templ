@@ -2,13 +2,13 @@ package pages
 
 import "github.com/maheshrc27/storemypdf/templates/components"
 
-templ Subscription(title string, premium bool, status string, nextBillDate string) {
-    @components.DashboardLayout(title) {
-        if premium {
+templ Subscription(title string, premium bool, userID, status string, nextBillDate string) {
+    if premium {
+        @components.DashboardLayout(title) {
             @SubscribedHtml(status, nextBillDate)
-        } else {
-            @NotSubscribedHtml()
         }
+    } else {
+        @Payment(userID)
     }
 }
 
@@ -21,19 +21,10 @@ templ SubscribedHtml(status string, nextBillDate string) {
                 <p class="mb-1"><span class="font-medium">Plan : </span>Premium</p>
                 <p><span class="font-medium">Next Billing Date: </span>{ nextBillDate }</p>
             </div>
-            <div class="flex gap-4">
-                <button id="cancel-subscription" class="font-medium bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">Cancel Subscription</button>
-                <button id="update-details" class="font-medium bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-opacity-50">Update Payment Details</button>
-            </div>
-        </div>
-    </section>
-}
-
-templ NotSubscribedHtml() {
-    <section class="max-w-screen-xl w-full mx-auto bg-white rounded border p-8">
-         <div class="text-center">
-            <p class="mb-4 text-gray-700 text-lg font-medium">You are not currently subscribed.</p>
-            <a href="/u/subscription/subscribe" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 font-semibold">Subscribe Now</a>
+            // <div class="flex gap-4">
+            //     <button id="cancel-subscription" class="font-medium bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">Cancel Subscription</button>
+            //     <button id="update-details" class="font-medium bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-opacity-50">Update Payment Details</button>
+            // </div>
         </div>
     </section>
 }

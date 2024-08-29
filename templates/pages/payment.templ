@@ -6,8 +6,9 @@ import (
 
 templ Payment(userID string) {
     @htmlWrapper() {
-        <section class="w-full py-12 px-6">
-            <div class="max-w-screen-lg mx-auto">
+        <section class="max-w-screen-xl w-full mx-auto bg-white rounded p-8">
+            <div class="text-center">
+                <p class="mb-4 text-gray-700 text-lg font-medium">You are not currently subscribed.</p>
                 <a href="#"
                 class="paddle_button"
                 data-theme="light"
@@ -18,15 +19,14 @@ templ Payment(userID string) {
                     }
                 ]'
                 data-custom-data={ customData(userID) }
-            >
-                Upgrade Now
-                </a>
+                >Subscribe Now</a>
             </div>
         </section>
     }
 }
 
 templ htmlWrapper() {
+    <!DOCTYPE html>
     <html lang='en'>
         <head>
             <meta charset='utf-8'>

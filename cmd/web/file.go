@@ -2,16 +2,13 @@ package main
 
 import (
 	"net/http"
-	"os"
-	"path/filepath"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/maheshrc27/storemypdf/internal/database"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
 const (
-	premiumFileSizeLimit        = 50 << 20 // 50 MB
+	premiumFileSizeLimit        = 64 << 20 // 50 MB
 	standardFileSizeLimit int64 = 15 << 20 // 15 MB
 	uploadDirPermissions        = 0750
 )
@@ -60,21 +57,12 @@ func (app *application) UploadFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	uploadDir := filepath.Join(getWorkingDir(), "uploads")
-	if err := os.MkdirAll(uploadDir, uploadDirPermissions); err != nil {
-		handleError(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
 	if err := SaveFileToS3(fileData.ID, header.Filename, file); err != nil {
 		handleError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	fileData.FileType, err = detectFileType(filepath.Join(uploadDir, fileData.ID+filepath.Ext(header.Filename)))
-	if err != nil {
-		fileData.FileType = ""
-	}
+	fileData.FileType = ""
 
 	if _, err := app.db.InsertFile(fileData.ID, fileData.FileName, fileData.Description, fileData.FileType, fileData.Size, fileData.UserID); err != nil {
 		handleError(w, err.Error(), http.StatusInternalServerError)
@@ -121,25 +109,4 @@ func (app *application) DeleteFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("HX-Refresh", "true")
-}
-
-func (app *application) DownloadFile(w http.ResponseWriter, r *http.Request) {
-	fileid := chi.URLParam(r, "fileid")
-	workDir, _ := os.Getwd()
-
-	fileInfo, found, err := app.db.GetFile(fileid)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	if !found {
-		http.Error(w, "Page Not Found", http.StatusNotFound)
-		return
-	}
-
-	filepath := filepath.Join(workDir, "uploads", fileid+".pdf")
-
-	w.Header().Set("Content-Disposition", "attachment; filename="+fileInfo.FileName)
-	w.Header().Set("Content-Type", fileInfo.FileType)
-	http.ServeFile(w, r, filepath)
 }

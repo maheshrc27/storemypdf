@@ -147,6 +147,6 @@ func (app *application) Subscription(w http.ResponseWriter, r *http.Request) {
 		nextbilldate = subscription.NextBillDate.Format("January 2, 2006")
 	}
 
-	page := pages.Subscription("Subscription Management", premium, status, nextbilldate)
+	page := pages.Subscription("Subscription Management", premium, userID.String(), status, nextbilldate)
 	page.Render(context.Background(), w)
 }
