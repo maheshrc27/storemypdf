@@ -25,11 +25,11 @@ func (db *DB) InsertKey(keyHash string, userID uuid.UUID) (int8, error) {
 	var id int8
 
 	query := `
-		INSERT INTO api_keys (api_key_hash, user_id)
-		VALUES ($1, $2)
+		INSERT INTO api_keys (api_key_hash, user_id, created, updated)
+		VALUES ($1, $2, $3, $4)
 		RETURNING id`
 
-	err := db.GetContext(ctx, &id, query, keyHash, userID)
+	err := db.GetContext(ctx, &id, query, keyHash, userID, time.Now(), time.Now())
 	if err != nil {
 		return 0, err
 	}

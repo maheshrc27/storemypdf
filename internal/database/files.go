@@ -25,10 +25,10 @@ func (db *DB) InsertFile(id, filename, description, fileType string, size int64,
 	defer cancel()
 
 	query := `
-		INSERT INTO files (id, filename, description, file_type, size, user_id)
-		VALUES ($1, $2, $3, $4, $5, $6)`
+		INSERT INTO files (id, filename, description, file_type, size, user_id, created, updated)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
 
-	_, err := db.ExecContext(ctx, query, id, filename, description, fileType, size, userId)
+	_, err := db.ExecContext(ctx, query, id, filename, description, fileType, size, userId, time.Now(), time.Now())
 	if err != nil {
 		return "", err
 	}

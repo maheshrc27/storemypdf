@@ -21,12 +21,14 @@ func (db *DB) InsertToDelete(fileId string, deleteTime time.Time) (uuid.UUID, er
 
 	var id uuid.UUID
 
+	uid := uuid.New()
+
 	query := `
-		INSERT INTO to_deletes (file_id, delete_time)
-		VALUES ($1, $2)
+		INSERT INTO to_deletes (id, file_id, delete_time, created, updated)
+		VALUES ($1, $2, $3, $4, $5)
 		returning id`
 
-	err := db.GetContext(ctx, &id, query, fileId, deleteTime)
+	err := db.GetContext(ctx, &id, query, uid.String(), fileId, deleteTime, time.Now(), time.Now())
 	if err != nil {
 		return uuid.Nil, err
 	}

@@ -26,11 +26,13 @@ func (db *DB) InsertSubscription(paddleSubscriptionID, paddlePlanID, status stri
 
 	var id uuid.UUID
 
-	query := `
-		INSERT INTO subscriptions (paddle_subscription_id, paddle_plan_id, status, next_bill_date, user_id)
-		VALUES ($1, $2, $3, $4, $5)`
+	uid := uuid.New()
 
-	err := db.GetContext(ctx, &id, query, paddleSubscriptionID, paddlePlanID, status, nextBillDate, userID)
+	query := `
+		INSERT INTO subscriptions (id, paddle_subscription_id, paddle_plan_id, status, next_bill_date, user_id, created, updated)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
+
+	err := db.GetContext(ctx, &id, query, uid.String(), paddleSubscriptionID, paddlePlanID, status, nextBillDate, userID, time.Now(), time.Now())
 	if err != nil {
 		return uuid.Nil, err
 	}

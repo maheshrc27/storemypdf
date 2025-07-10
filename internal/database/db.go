@@ -8,6 +8,7 @@ import (
 
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/lib/pq"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 const defaultTimeout = 3 * time.Second
@@ -20,7 +21,7 @@ func New(dsn string) (*DB, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
-	db, err := sqlx.ConnectContext(ctx, "postgres", "postgres://"+dsn)
+	db, err := sqlx.ConnectContext(ctx, "sqlite3", dsn)
 	if err != nil {
 		return nil, err
 	}

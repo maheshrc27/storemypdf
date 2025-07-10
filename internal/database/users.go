@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -24,13 +25,16 @@ func (db *DB) InsertUser(email, hashedPassword string) (uuid.UUID, error) {
 
 	var id uuid.UUID
 
+	uid := uuid.New()
+
 	query := `
-		INSERT INTO users (created, email, hashed_password, verified)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO users (id, created, updated, email, hashed_password, verified)
+		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING id`
 
-	err := db.GetContext(ctx, &id, query, time.Now(), email, hashedPassword, false)
+	err := db.GetContext(ctx, &id, query, uid.String(), time.Now(), time.Now(), email, hashedPassword, 0)
 	if err != nil {
+		fmt.Printf("%v", err)
 		return uuid.Nil, err
 	}
 
